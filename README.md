@@ -338,6 +338,12 @@ This structure separates concerns by grouping similar functionalities together:
   - **Procfile**: For Heroku deployment.
   - **Aptfile**: To specify additional system-level dependencies.
   - **runtime.txt**: To define the Python runtime version.
+- **.env:** The necessary environment variables to run this project includes:
+  - **SECRET_KEY**: This is for the django server.
+  - **ALLOWED_HOSTS**: The list of valid hostnames.
+  - **OPENAI_API_KEY**: The OpenAI API key.
+  - **OPENAI_API_KEY_OWNER**: The owner of the OpenAI API key.
+  - **GOOGLE_CRED_PATH**: The path to your Google Cloud service account key JSON file.
 
 ---
 
