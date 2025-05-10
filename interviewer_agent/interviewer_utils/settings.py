@@ -4,8 +4,8 @@ import random
 
 def get_open_api_keyset(): 
   open_api_keyset = []
-  open_api_keyset += [{"key": "",
-                       "owner": "",
+  open_api_keyset += [{"key": os.environ.get("OPENAI_API_KEY", ""),
+                       "owner": os.environ.get("OPENAI_API_KEY_OWNER", ""),
                        "id": 1,
                        "weight": 12}]
 
@@ -22,7 +22,7 @@ DEBUG = True
 
 STORAGE_DIR = "storage"
 
-GOOGLE_CRED_PATH = ""
+GOOGLE_CRED_PATH = os.environ.get("GOOGLE_CRED_PATH", "")
 
 INTERVIEW_AGENT_PATH = "interviewer_agent"
 

@@ -10,7 +10,7 @@ from google.cloud import speech
 import sys
 import os
 
-OPENAI_API_KEY = "" # Percy
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 KEY_OWNER = "Percy Liang"
 
 # DEBUG = False
@@ -18,7 +18,7 @@ DEBUG = True
 
 STORAGE_DIR = "storage"
 
-GOOGLE_CRED_PATH = ""
+GOOGLE_CRED_PATH = os.environ.get("GOOGLE_CRED_PATH", "")
 
 INTERVIEW_AGENT_PATH = "interviewer_agent"
 openai.api_key = OPENAI_API_KEY

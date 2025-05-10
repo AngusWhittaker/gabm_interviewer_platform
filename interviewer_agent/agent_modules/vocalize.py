@@ -38,6 +38,7 @@ def generate_voice(curr_input="Hello there!", voice="nova"):
     model="tts-1",
     voice=voice,
     input=curr_input,
+    response_format="wav",
   )
   audio_data = response.content 
   return audio_data
