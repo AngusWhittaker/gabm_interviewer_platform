@@ -96,3 +96,9 @@ ENV/
 .ropeproject
 
 google-cred.json
+
+media_root/
+
+static_root/
+
+db.sqlite3

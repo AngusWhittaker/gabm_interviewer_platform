@@ -325,7 +325,19 @@ This structure separates concerns by grouping similar functionalities together:
    - Update or customize interview scripts located in `interviewer_agent/interview_script/new_avp_full_v1/` as needed.
    - Use the agent modules in `interviewer_agent/agent_modules/` for transcription and vocalization functionalities.
 
-3. **Working with Templates**
+3. **Creating an admin account**
+
+   ```bash
+   python manage.py createsuperuser
+   ```
+   Access the application page at [http://localhost:8000/admin](http://localhost:8000/admin)
+
+4. **Loading the interview data**
+
+   - Using the admin account access [http://localhost:8000/summary](http://localhost:8000/summary) to see the participant list.
+   - From here you can load all of the interview data.
+
+5. **Working with Templates**
 
    Customize the look and feel of the platform by editing the HTML templates in the `templates/` directory.
 
