@@ -311,7 +311,22 @@ This structure separates concerns by grouping similar functionalities together:
 
 ## Usage
 
-1. **Run the Development Server**
+1. **Create the db** 
+Wipe db.sqlite3 in src directory and run
+
+   ```bash
+   python manage.py makemigrations
+   python manage.py migrate
+   ```
+
+2. **Creating an admin account**
+
+   ```bash
+   python manage.py createsuperuser
+   ```
+   Access the application page at [http://localhost:8000/admin](http://localhost:8000/admin)
+
+3. **Run the Development Server**
 
    ```bash
    python manage.py runserver
@@ -319,25 +334,18 @@ This structure separates concerns by grouping similar functionalities together:
 
    Access the application at [http://localhost:8000](http://localhost:8000).
 
-2. **Managing Interviews**
+4. **Managing Interviews**
 
    - Configure your interview settings via the Django admin or through the dedicated settings in the `pages` app.
    - Update or customize interview scripts located in `interviewer_agent/interview_script/new_avp_full_v1/` as needed.
    - Use the agent modules in `interviewer_agent/agent_modules/` for transcription and vocalization functionalities.
 
-3. **Creating an admin account**
-
-   ```bash
-   python manage.py createsuperuser
-   ```
-   Access the application page at [http://localhost:8000/admin](http://localhost:8000/admin)
-
-4. **Loading the interview data**
+5. **Loading the interview data**
 
    - Using the admin account access [http://localhost:8000/summary](http://localhost:8000/summary) to see the participant list.
    - From here you can load all of the interview data.
 
-5. **Working with Templates**
+6. **Working with Templates**
 
    Customize the look and feel of the platform by editing the HTML templates in the `templates/` directory.
 
