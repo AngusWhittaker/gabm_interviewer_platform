@@ -36,8 +36,8 @@ ordered_modules = ["Consent",
 
 second_survey_timeout = timedelta(days=14)
 
-first_survey_code = "Isabella throws"
-second_survey_code = "a party"
+first_survey_code = "Chocolate"
+second_survey_code = "factory"
 
 # This goes from 0.0 to 1.0... 1 gurantees that the participant will take the behavioral study
 behavioral_study_activation_rate = 1.0

@@ -670,6 +670,7 @@ def handler_upload_surveycode(request):
 
   form = SurveyCompletionForm(request.POST)
   if form.is_valid():
+    
     survey_part = form.cleaned_data['survey_part']
     survey_code_pt1 = form.cleaned_data['survey_code_pt1'].lower().strip()
     survey_code_pt2 = form.cleaned_data['survey_code_pt2'].lower().strip()
@@ -681,7 +682,7 @@ def handler_upload_surveycode(request):
 
     
     if survey_part == "1": 
-      if "isabella" in survey_code and "party" in survey_code:
+      if "chocolate" in survey_code and "factory" in survey_code:
         request.user.module_completed("Survey Pt.1")
         # request.user.module_completed_det(f"Survey Pt.1::{survey_code}")
         # two_weeks_later = datetime.datetime.now() + timedelta(seconds=30)

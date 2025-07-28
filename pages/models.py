@@ -5,11 +5,14 @@ import json
 import base64
 import io
 import string
+import logging
 
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.core.files.base import ContentFile
+
+logging.basicConfig(level=logging.INFO)
 from django.core.files import File
 from django.core.files.storage import default_storage as storage
 from django.contrib.auth.models import User
@@ -1071,14 +1074,13 @@ class Participant(AbstractUser):
 
   def get_survey_link_pt2(self): 
     s = self.camerer_activated
-    x = ""
     if len(s) > 4: 
-      x = f"https://stanforduniversity.qualtrics.com/jfe/form/SV_1Huw5wFg3admF8O?1={s[0]}&2={s[1]}&3={s[2]}&4={s[3]}&5={s[4]}&email={self.email}"
-    return x
+       return f"https://www.surveymonkey.com/r/X6X8G6Q"
+    return "/"
 
 
   def get_survey_link_pt1(self): 
-    x = f"https://stanforduniversity.qualtrics.com/jfe/form/SV_5i2P0DnXVhAb1IO?email={self.email}"
+    x = f"https://www.surveymonkey.com/r/X6M62FK"
     return x
 
 
