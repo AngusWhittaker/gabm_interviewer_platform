@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("DEBUG", True)
+DEBUG = os.environ.get("DEBUG", default=0)
 
 ALLOWED_HOSTS = list(os.environ.get("ALLOWED_HOSTS", "").split(","))
 
@@ -122,11 +122,17 @@ WSGI_APPLICATION = 'gabm_infra.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+     'default': {
+         'ENGINE': 'django.db.backends.{}'.format(
+             os.getenv('DATABASE_ENGINE', 'sqlite3')
+         ),
+         'NAME': os.getenv('DATABASE_NAME', 'polls'),
+         'USER': os.getenv('DATABASE_USERNAME', 'myprojectuser'),
+         'PASSWORD': os.getenv('DATABASE_PASSWORD', 'password'),
+         'HOST': os.getenv('DATABASE_HOST', '127.0.0.1'),
+         'PORT': os.getenv('DATABASE_PORT', 5432),
+     }
+ }
 
 SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
