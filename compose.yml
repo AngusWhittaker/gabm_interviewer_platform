@@ -62,6 +62,7 @@ services:
       ADMIN_USERNAME: ${ADMIN_USERNAME}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ENVIRONMENT: PROD
     networks:
       - postgres-db-network
     restart: always

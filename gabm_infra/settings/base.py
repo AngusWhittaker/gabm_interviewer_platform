@@ -56,6 +56,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # WhiteNoise Middleware to serve static files needs to be placed after SecurityMiddleware
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -184,6 +186,13 @@ STATIC_ROOT = f"{BASE_DIR}/static_root"
 STATICFILES_DIRS = (
     f"{BASE_DIR}/static_dirs",
 )
+
+# If you are using hashed static files
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# If you are using uncompressed static files
+STATICFILES_STORAGE = "whitenoise.storage.StaticFilesStorage"
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = f"{BASE_DIR}/media_root"
