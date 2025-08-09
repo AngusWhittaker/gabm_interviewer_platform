@@ -14,10 +14,6 @@ echo "✅ Postgres is up"
 echo "📦 Running migrations..."
 python manage.py migrate --noinput --verbosity 2 || echo "Migrations already applied"
 
-echo "📁 Collecting static files..."
-python manage.py collectstatic --noinput --verbosity 2 || echo "Static files already collected"
-
-
 echo "👤 Creating admin..."
 python manage.py shell < superuser.py || echo "Admin already exists"
 
