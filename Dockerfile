@@ -37,6 +37,5 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY . .
 
 COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
- 
-ENTRYPOINT ["/app/entrypoint.sh"]
+
+ENTRYPOINT ["/bin/sh","-c","sed -i 's/\\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh && exec /bin/sh /app/entrypoint.sh"]

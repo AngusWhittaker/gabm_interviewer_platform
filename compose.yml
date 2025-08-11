@@ -37,7 +37,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: ["/app/entrypoint.sh"]
     container_name: app
     ports:
       - 8000:8000
