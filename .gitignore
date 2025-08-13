@@ -102,3 +102,6 @@ media_root/
 static_root/
 
 db.sqlite3
+
+pages/migrations/
+!pages/migrations/__init__.py

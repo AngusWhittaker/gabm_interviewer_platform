@@ -11,6 +11,9 @@ done
 
 echo "✅ Postgres is up"
 
+echo "📦 Making migrations..."
+python manage.py makemigrations || echo "Migrations already applied"
+
 echo "📦 Running migrations..."
 python manage.py migrate --noinput --verbosity 2 || echo "Migrations already applied"
 
