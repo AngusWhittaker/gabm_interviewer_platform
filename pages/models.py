@@ -988,6 +988,25 @@ class BehavioralStudyModule(models.Model):
       self.study_rand_o_2 = json.dumps(curr_dict, indent=4)
     self.save()
 
+class StudySetting(models.Model):
+  contact_email = models.EmailField(max_length=254, default=os.environ.get("CONTACT_EMAIL", "test@test.com.au"))
+  consent_form_url = models.URLField(max_length=2048, default=os.environ.get("CONSENT_FORM_LINK", "http://example.com/consent"))
+  survey_1_url = models.URLField(max_length=2048, default=os.environ.get("SURVEY_1_LINK", "http://example.com/survey1"))
+  survey_1_secret = models.CharField(max_length=100, default=os.environ.get("SURVEY_1_SECRET", "secret1"))
+  survey_2_url = models.URLField(max_length=2048, default=os.environ.get("SURVEY_2_LINK", "http://example.com/survey2"))
+  survey_2_secret = models.CharField(max_length=100, default=os.environ.get("SURVEY_2_SECRET", "secret2"))
+
+  def save(self, *args, **kwargs):
+    self.pk = 1
+    super(StudySetting, self).save(*args, **kwargs)
+  
+  def delete(self, *args, **kwargs):
+    pass
+
+  @classmethod
+  def load(cls):
+    obj, created = cls.objects.get_or_create(pk=1)
+    return obj
 
 class Participant(AbstractUser): 
   """

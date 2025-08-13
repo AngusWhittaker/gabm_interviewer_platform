@@ -14,6 +14,9 @@ echo "✅ Postgres is up"
 echo "📦 Running migrations..."
 python manage.py migrate --noinput --verbosity 2 || echo "Migrations already applied"
 
+echo "⚙️ Loading default settings..."
+python load_settings.py || echo "Default settings already loaded"
+
 echo "👤 Creating admin..."
 python manage.py shell < superuser.py || echo "Admin already exists"
 

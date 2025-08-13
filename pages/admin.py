@@ -77,6 +77,12 @@ class TimeoutTimerAdmin(admin.ModelAdmin):
   list_filter = ()
 admin.site.register(TimeoutTimer, TimeoutTimerAdmin)
 
-
-
-
+class StudySettingAdmin(admin.ModelAdmin):
+  list_display=('contact_email',
+                'consent_form_url', 
+                'survey_1_url', 
+                'survey_1_secret', 
+                'survey_2_url', 
+                'survey_2_secret')
+  list_filter=()
+admin.site.register(StudySetting, StudySettingAdmin)
