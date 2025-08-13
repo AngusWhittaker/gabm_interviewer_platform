@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block custom_head_content %}
+  <style>
+    .module-title {
+      font-weight:800;
+    }
+
+    #consent_form input {
+      margin-bottom:1.2em
+    }
+    
+    .break-url {
+      word-break: break-all;
+      overflow-wrap: break-word;
+    }
+  </style>
+
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/select2/select2.css' %}" />
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/styles/index.min.css' %}" />
+  <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.css' %}" />
+{% endblock custom_head_content %}
+
+{% block content %}
+  <div class="content-wrapper">
+
+    <div class="container-xxl flex-grow-1 container-p-y">
+      <h4 class="py-3 mb-4">Modify Study Details</h4>
+
+      <div class="card g-3 mt-5" style="margin-top:0em !important">
+        <div class="card-body row g-3">
+          
+          <div class="col-lg-8">
+
+            <div class="card-body">
+              <div class="added-cards">
+
+                <div class="cardMaster border p-3 rounded mb-3">
+                  <div class="d-flex justify-content-between flex-column">
+                    <div class="card-information">
+                      <p style="font-weight:bold;">
+                        <i class="menu-icon tf-icons bx bx-file"></i>
+                        Consent Form URL
+                      </p>
+                      <div class="my-3">
+                        <span>
+                          The current url is <a href="https://docs.google.com/document/d/1Mzy_Ldz5YkXv94MG_OThwF5v5nZzrpSrRrNhVTdIrOg" class="break-url" target="_blank">https://docs.google.com/document/d/1Mzy_Ldz5YkXv94MG_OThwF5v5nZzrpSrRrNhVTdIrOg</a>.
+                        </span>
+                      </div>
+                      <form action="/process-url/" method="post">
+                        {% csrf_token %}
+                        <div class="d-flex flex-column">
+                          <label for="website">Enter your new URL below</label>
+                          <div>
+                            <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="https://docs.google.com/document/d/1Mzy_Ldz5YkXv94MG_OThwF5v5nZzrpSrRrNhVTdIrOg" required>
+                            <div class="d-flex flex-row-reverse">
+                              <button class="btn btn-label-secondary" type="submit">Submit</button>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cardMaster border p-3 rounded mb-3">
+                  <div class="d-flex justify-content-between flex-column">
+                    <div class="card-information">
+                      <p style="font-weight:bold;">
+                        <i class="menu-icon tf-icons bx bx-envelope"></i>
+                        Contact Email
+                      </p>
+                      <div class="my-3">
+                        <span>
+                          The currently provided email is <a href="mailto:a.whittaker@student.uq.edu.au" class="break-url" target="_blank">a.whittaker@student.uq.edu.au</a>.
+                        </span>
+                      </div>
+                      <form action="/process-url/" method="post">
+                        {% csrf_token %}
+                        <div class="d-flex flex-column">
+                          <label for="website">Enter your new email below</label>
+                          <div>
+                            <input class="input my-2" style="width:100%" type="email" id="website" name="website" placeholder="a.whittaker@student.uq.edu.au" required>
+                            <div class="d-flex flex-row-reverse">
+                              <button class="btn btn-label-secondary" type="submit">Submit</button>
+                            </div>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cardMaster border p-3 rounded mb-3">
+                  <div class="d-flex justify-content-between flex-column">
+                    <div class="card-information">
+                      <p style="font-weight:bold;">
+                        <i class="menu-icon tf-icons bx bx-file"></i>
+                        Survey Pt.1
+                      </p>
+                      <div class="my-3">
+                        <span>
+                          The current url is <a href="{{request.user.get_survey_link_pt1}}" class="break-url" target="_blank">{{request.user.get_survey_link_pt1}}</a>.
+                          <br>
+                          The current secret word is <span style="font-weight:bold;">Chocolate</span>.
+                        </span>
+                      </div>
+                      <form action="/process-url/" method="post">
+                        {% csrf_token %}
+                        <div class="d-flex flex-column">
+                          <label for="website">Enter your new URL below</label>
+                          <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="{{request.user.get_survey_link_pt1}}" required>
+                          <label for="secret_word">Enter your new secret word below</label>
+                          <input class="input my-2" style="width:100%" type="text" id="secret_word" name="secret_word" placeholder="Chocolate" required>
+                          <div class="d-flex flex-row-reverse">
+                              <button class="btn btn-label-secondary" type="submit">Submit</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="cardMaster border p-3 rounded mb-3">
+                  <div class="d-flex justify-content-between flex-column">
+                    <div class="card-information">
+                      <p style="font-weight:bold;">
+                        <i class="menu-icon tf-icons bx bx-file"></i>
+                        Survey Pt.2
+                      </p>
+                      <div class="my-3">
+                        <span>
+                          The current url is <a href="{{request.user.get_survey_link_pt2}}" class="break-url" target="_blank">{{request.user.get_survey_link_pt2}}</a>.
+                          <br>
+                          The current secret word is <span style="font-weight:bold;">Factory</span>.
+                        </span>
+                      </div>
+                      <form action="/process-url/" method="post">
+                        {% csrf_token %}
+                        <div class="d-flex flex-column">
+                          <label for="website">Enter your new URL below</label>
+                          <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="{{request.user.get_survey_link_pt2}}" required>
+                          <label for="secret_word">Enter your new secret word below</label>
+                          <input class="input my-2" style="width:100%" type="text" id="secret_word" name="secret_word" placeholder="Factory" required>
+                          <div class="d-flex flex-row-reverse">
+                              <button class="btn btn-label-secondary" type="submit">Submit</button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock content %}
+
+{% block js_content %}
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/cleavejs/cleave.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/cleavejs/cleave-phone.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/select2/select2.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/bundle/popular.min.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/plugin-bootstrap5/index.min.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/@form-validation/umd/plugin-auto-focus/index.min.js' %}"></script>
+  <script src="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
+
+  <script src="{% static 'gabm/sneat/assets/js/modal-create-app.js' %}"></script>
+  {% endblock js_content %}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1074,7 +1074,7 @@ class Participant(AbstractUser):
 
   def get_survey_link_pt2(self): 
     s = self.camerer_activated
-    if len(s) > 4: 
+    if len(s) > 4 or self.is_superuser: 
        return f"https://www.surveymonkey.com/r/X6X8G6Q"
     return "/"
 

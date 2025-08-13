@@ -153,6 +153,11 @@ def home(request, det=None):
     context = {}
     template = "pages/home/landing.html"
     return render(request, template, context)
+  
+  if request.user.is_superuser:
+    context = {}
+    template = "pages/home/admin.html"
+    return render(request, template, context)
 
   completed_modules = request.user.get_completed_modules()
   curr_module = get_curr_module(request.user, completed_modules)
