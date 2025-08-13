@@ -11,6 +11,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 from django.core.files.base import ContentFile
+from django.core.cache import cache
 
 logging.basicConfig(level=logging.INFO)
 from django.core.files import File
@@ -988,6 +989,7 @@ class BehavioralStudyModule(models.Model):
       self.study_rand_o_2 = json.dumps(curr_dict, indent=4)
     self.save()
 
+#Created following the guide from https://globaldev.tech/blog/practical-application-singleton-design-pattern
 class StudySetting(models.Model):
   contact_email = models.EmailField(max_length=254, default=os.environ.get("CONTACT_EMAIL", "test@test.com.au"))
   consent_form_url = models.URLField(max_length=2048, default=os.environ.get("CONSENT_FORM_LINK", "http://example.com/consent"))
@@ -996,17 +998,24 @@ class StudySetting(models.Model):
   survey_2_url = models.URLField(max_length=2048, default=os.environ.get("SURVEY_2_LINK", "http://example.com/survey2"))
   survey_2_secret = models.CharField(max_length=100, default=os.environ.get("SURVEY_2_SECRET", "secret2"))
 
+  def set_cache(self):
+    cache.set(self.__class__.__name__, self)
+
   def save(self, *args, **kwargs):
     self.pk = 1
     super(StudySetting, self).save(*args, **kwargs)
+    self.set_cache()
   
   def delete(self, *args, **kwargs):
     pass
 
   @classmethod
   def load(cls):
-    obj, created = cls.objects.get_or_create(pk=1)
-    return obj
+    if cache.get(cls.__name__) is None:
+      obj, created = cls.objects.get_or_create(pk=1)
+      if not created:
+        obj.set_cache()
+    return cache.get(cls.__name__)
 
 class Participant(AbstractUser): 
   """

@@ -46,7 +46,7 @@
                       </p>
                       <div class="my-3">
                         <span>
-                          The current url is <a href="https://docs.google.com/document/d/1Mzy_Ldz5YkXv94MG_OThwF5v5nZzrpSrRrNhVTdIrOg" class="break-url" target="_blank">https://docs.google.com/document/d/1Mzy_Ldz5YkXv94MG_OThwF5v5nZzrpSrRrNhVTdIrOg</a>.
+                          The current url is <a href="{{settings.consent_form_url}}" class="break-url" target="_blank">{{settings.consent_form_url}}</a>.
                         </span>
                       </div>
                       <form action="/process-url/" method="post">
@@ -54,7 +54,7 @@
                         <div class="d-flex flex-column">
                           <label for="website">Enter your new URL below</label>
                           <div>
-                            <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="https://docs.google.com/document/d/1Mzy_Ldz5YkXv94MG_OThwF5v5nZzrpSrRrNhVTdIrOg" required>
+                            <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="{{settings.consent_form_url}}" required>
                             <div class="d-flex flex-row-reverse">
                               <button class="btn btn-label-secondary" type="submit">Submit</button>
                             </div>
@@ -74,7 +74,7 @@
                       </p>
                       <div class="my-3">
                         <span>
-                          The currently provided email is <a href="mailto:a.whittaker@student.uq.edu.au" class="break-url" target="_blank">a.whittaker@student.uq.edu.au</a>.
+                          The currently provided email is <a href="{{settings.contact_email}}" class="break-url" target="_blank">{{settings.contact_email}}</a>.
                         </span>
                       </div>
                       <form action="/process-url/" method="post">
@@ -82,7 +82,7 @@
                         <div class="d-flex flex-column">
                           <label for="website">Enter your new email below</label>
                           <div>
-                            <input class="input my-2" style="width:100%" type="email" id="website" name="website" placeholder="a.whittaker@student.uq.edu.au" required>
+                            <input class="input my-2" style="width:100%" type="email" id="website" name="website" placeholder="{{settings.contact_email}}" required>
                             <div class="d-flex flex-row-reverse">
                               <button class="btn btn-label-secondary" type="submit">Submit</button>
                             </div>
@@ -102,18 +102,18 @@
                       </p>
                       <div class="my-3">
                         <span>
-                          The current url is <a href="{{request.user.get_survey_link_pt1}}" class="break-url" target="_blank">{{request.user.get_survey_link_pt1}}</a>.
+                          The current url is <a href="{{settings.survey_1_url}}" class="break-url" target="_blank">{{settings.survey_1_url}}</a>.
                           <br>
-                          The current secret word is <span style="font-weight:bold;">Chocolate</span>.
+                          The current secret word is <span style="font-weight:bold;">{{settings.survey_1_secret}}</span>.
                         </span>
                       </div>
                       <form action="/process-url/" method="post">
                         {% csrf_token %}
                         <div class="d-flex flex-column">
                           <label for="website">Enter your new URL below</label>
-                          <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="{{request.user.get_survey_link_pt1}}" required>
+                          <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="{{settings.survey_1_url}}" required>
                           <label for="secret_word">Enter your new secret word below</label>
-                          <input class="input my-2" style="width:100%" type="text" id="secret_word" name="secret_word" placeholder="Chocolate" required>
+                          <input class="input my-2" style="width:100%" type="text" id="secret_word" name="secret_word" placeholder="{{settings.survey_1_secret}}" required>
                           <div class="d-flex flex-row-reverse">
                               <button class="btn btn-label-secondary" type="submit">Submit</button>
                           </div>
@@ -132,18 +132,18 @@
                       </p>
                       <div class="my-3">
                         <span>
-                          The current url is <a href="{{request.user.get_survey_link_pt2}}" class="break-url" target="_blank">{{request.user.get_survey_link_pt2}}</a>.
+                          The current url is <a href="{{settings.survey_2_url}}" class="break-url" target="_blank">{{settings.survey_2_url}}</a>.
                           <br>
-                          The current secret word is <span style="font-weight:bold;">Factory</span>.
+                          The current secret word is <span style="font-weight:bold;">{{settings.survey_2_secret}}</span>.
                         </span>
                       </div>
                       <form action="/process-url/" method="post">
                         {% csrf_token %}
                         <div class="d-flex flex-column">
                           <label for="website">Enter your new URL below</label>
-                          <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="{{request.user.get_survey_link_pt2}}" required>
+                          <input class="input my-2" style="width:100%" type="url" id="website" name="website" placeholder="{{settings.survey_2_url}}" required>
                           <label for="secret_word">Enter your new secret word below</label>
-                          <input class="input my-2" style="width:100%" type="text" id="secret_word" name="secret_word" placeholder="Factory" required>
+                          <input class="input my-2" style="width:100%" type="text" id="secret_word" name="secret_word" placeholder="{{settings.survey_2_secret}}" required>
                           <div class="d-flex flex-row-reverse">
                               <button class="btn btn-label-secondary" type="submit">Submit</button>
                           </div>
