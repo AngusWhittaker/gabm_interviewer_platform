@@ -919,10 +919,49 @@ def zipped_reset_check(request, participant_username, script_v):
   
   return summary(request)
 
+def update_contact_email(request):
+  if request.method == 'POST' and request.user.is_authenticated and request.user.is_superuser:
+    email = request.POST.get('email', '')
+    studySetting = StudySetting.load()
+    studySetting.contact_email = email
+    studySetting.save()
+    return redirect("/")
+  
+  return Http404()
 
+def update_consent_url(request):
+  if request.method == 'POST' and request.user.is_authenticated and request.user.is_superuser:
+    url = request.POST.get('website', '')
+    studySetting = StudySetting.load()
+    studySetting.consent_form_url = url
+    studySetting.save()
+    return redirect("/")
+  
+  return Http404()
 
+def update_survey_1(request):
+  if request.method == 'POST' and request.user.is_authenticated and request.user.is_superuser:
+    url = request.POST.get('website', '')
+    secret = request.POST.get('secret_word', '')
+    studySetting = StudySetting.load()
+    studySetting.survey_1_url = url
+    studySetting.survey_1_secret = secret
+    studySetting.save()
+    return redirect("/")
+  
+  return Http404()
 
-
+def update_survey_2(request):
+  if request.method == 'POST' and request.user.is_authenticated and request.user.is_superuser:
+    url = request.POST.get('website', '')
+    secret = request.POST.get('secret_word', '')
+    studySetting = StudySetting.load()
+    studySetting.survey_2_url = url
+    studySetting.survey_2_secret = secret
+    studySetting.save()
+    return redirect("/")
+  
+  return Http404()
 
 
 

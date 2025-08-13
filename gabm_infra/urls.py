@@ -40,7 +40,10 @@ pages_urlpatterns = [
   re_path(r'^handler_upload_surveycode$', pages_views.handler_upload_surveycode, name='handler_upload_surveycode'),
   re_path(r'^handler_upload_experiment_code$', pages_views.handler_upload_experiment_code, name='handler_upload_experiment_code'),
   re_path(r'^handler_download_summaries/(?P<starting_index>[^/]+)/(?P<desired_count>[^/]+)/$', pages_views.handler_download_summaries, name='handler_download_summaries'),
-
+  re_path(r'update-contact-email/', pages_views.update_contact_email, name='update_contact_email'),
+  re_path(r'update-consent-url/', pages_views.update_consent_url, name='update_consent_url'),
+  re_path(r'update-survey-1/', pages_views.update_survey_1, name='update_survey_1'),
+  re_path(r'update-survey-2/', pages_views.update_survey_2, name='update_survey_2'),
   re_path(r'^zipped_reset_check/(?P<participant_username>[^/]+)/(?P<script_v>[^/]+)/$', pages_views.zipped_reset_check, name='zipped_reset_check'),
 ]
 
