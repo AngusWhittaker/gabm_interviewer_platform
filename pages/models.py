@@ -998,24 +998,17 @@ class StudySetting(models.Model):
   survey_2_url = models.URLField(max_length=2048, default=os.environ.get("SURVEY_2_LINK", "http://example.com/survey2"))
   survey_2_secret = models.CharField(max_length=100, default=os.environ.get("SURVEY_2_SECRET", "secret2"))
 
-  def set_cache(self):
-    cache.set(self.__class__.__name__, self)
-
   def save(self, *args, **kwargs):
     self.pk = 1
     super(StudySetting, self).save(*args, **kwargs)
-    self.set_cache()
   
   def delete(self, *args, **kwargs):
     pass
 
   @classmethod
   def load(cls):
-    if cache.get(cls.__name__) is None:
-      obj, created = cls.objects.get_or_create(pk=1)
-      if not created:
-        obj.set_cache()
-    return cache.get(cls.__name__)
+    obj, created = cls.objects.get_or_create(pk=1)
+    return obj
 
 class Participant(AbstractUser): 
   """
