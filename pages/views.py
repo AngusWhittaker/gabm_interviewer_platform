@@ -11,7 +11,7 @@ import csv
 
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
+from django.http import Http404, HttpResponseRedirect, JsonResponse, HttpResponse
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.conf import settings
@@ -264,6 +264,9 @@ def summary(request):
     context = {}
     template = "pages/home/landing.html"
     return render(request, template, context)
+    
+  if not request.user.is_superuser:
+    raise Http404("Page not found")
 
   all_interviews = Interview.objects.all().order_by("-created")
 
@@ -278,6 +281,9 @@ def summary_unprocessed_v1(request):
     context = {}
     template = "pages/home/landing.html"
     return render(request, template, context)
+    
+  if not request.user.is_superuser:
+    raise Http404("Page not found")
 
   all_interviews = Interview.objects.filter(completed_sec=2709).filter(zipped_main=False).order_by("-created")
 
