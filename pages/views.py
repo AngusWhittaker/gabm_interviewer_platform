@@ -27,6 +27,7 @@ from allauth.account.signals import user_logged_in, user_signed_up
 from interviewer_agent.interviewer_utils.settings import *
 from interviewer_agent.agent_modules.vocalize import *
 from interviewer_agent.agent_modules.transcribe import *
+from sim_brain.models import Expert
 
 from .forms import *
 from .models import *
@@ -189,7 +190,6 @@ def home(request, det=None):
 
   template = "pages/home/home.html"
   return render(request, template, context)
-
 
 def create_avatar(request):
   if not request.user.is_authenticated:
@@ -964,7 +964,58 @@ def update_survey_2(request):
   return Http404()
 
 
+def experts(request):
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
 
+  experts = Expert.objects.all().order_by("name")
+  context = {"experts": experts}
+  template = "pages/experts/experts.html"
+  return render(request, template, context)
 
+def create_expert(request):
+  if request.method == 'POST' and request.user.is_authenticated and request.user.is_superuser:
+    name = request.POST.get('name', '')
+    prompt = request.POST.get('prompt', '')
+    if Expert.objects.filter(name=name).exists():
+        return JsonResponse({"success": False, "message": "Expert \"" + name + "\" already exists. Do you want to update instead?"})
+    
+    expert = Expert()
+    expert.name = name
+    expert.prompt = prompt
+    expert.save()
+    return JsonResponse({"success": True, "message": "Expert \"" + name + "\" created successfully."})
 
+  return Http404()
 
+def update_expert(request, original_name):
+  if request.method == 'POST' and request.user.is_authenticated and request.user.is_superuser:
+    if not Expert.objects.filter(name=original_name).exists():
+      return HttpResponse("Expert not found.", status=404)
+    
+    name = request.POST.get('name', '')
+
+    if name != original_name and Expert.objects.filter(name=name).exists():
+        return HttpResponse("Expert with this name already exists.", status=400)
+    
+    prompt = request.POST.get('prompt', '')
+    expert = Expert.objects.get(name=original_name)
+    expert.name = name
+    expert.prompt = prompt
+    expert.save()
+    return redirect("/experts")
+
+  return Http404()
+
+def delete_expert(request, expert_name):
+  if request.method == 'POST' and request.user.is_authenticated and request.user.is_superuser:
+    if not Expert.objects.filter(name=expert_name).exists():
+      return HttpResponse("Expert not found.", status=404)
+
+    expert = Expert.objects.get(name=expert_name)
+    expert.delete()
+    return JsonResponse({"success": True})
+
+  return Http404()

@@ -53,6 +53,7 @@ INSTALLED_APPS = [
 
     'pages',
     'storages',
+    'sim_brain',
 ]
 
 MIDDLEWARE = [

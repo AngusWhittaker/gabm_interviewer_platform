@@ -1,4 +1,6 @@
 from django.contrib import admin
+
+from sim_brain.models import Expert
 from .models import *
 
 
@@ -86,3 +88,8 @@ class StudySettingAdmin(admin.ModelAdmin):
                 'survey_2_secret')
   list_filter=()
 admin.site.register(StudySetting, StudySettingAdmin)
+
+class ExpertReflectionAgentsAdmin(admin.ModelAdmin):
+  list_display = ('name', 'prompt')
+  list_filter = ()
+admin.site.register(Expert, ExpertReflectionAgentsAdmin)

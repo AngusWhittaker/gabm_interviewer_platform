@@ -25,6 +25,7 @@ pages_urlpatterns = [
   re_path(r'^$', pages_views.home, name='home'),
   re_path(r'^login$', pages_views.login, name='login'),
   re_path(r'^create_avatar$', pages_views.create_avatar, name='create_avatar'),
+  re_path(r'^experts$', pages_views.experts, name='experts'),
   re_path(r'^interview/(?P<script_v>[^/]+)/$', pages_views.interview, name='interview'),
   re_path(r'^summary$', pages_views.summary, name='summary'),
   re_path(r'^summary_unprocessed_v1$', pages_views.summary_unprocessed_v1, name='summary_unprocessed_v1'),
@@ -44,6 +45,9 @@ pages_urlpatterns = [
   re_path(r'update-consent-url/', pages_views.update_consent_url, name='update_consent_url'),
   re_path(r'update-survey-1/', pages_views.update_survey_1, name='update_survey_1'),
   re_path(r'update-survey-2/', pages_views.update_survey_2, name='update_survey_2'),
+  re_path(r'create-expert/', pages_views.create_expert, name='create_expert'),
+  re_path(r'^update-expert/(?P<original_name>[^/]+)/$', pages_views.update_expert, name='update_expert'),
+  re_path(r'^delete-expert/(?P<expert_name>[^/]+)/$', pages_views.delete_expert, name='delete_expert'),
   re_path(r'^zipped_reset_check/(?P<participant_username>[^/]+)/(?P<script_v>[^/]+)/$', pages_views.zipped_reset_check, name='zipped_reset_check'),
 ]
 

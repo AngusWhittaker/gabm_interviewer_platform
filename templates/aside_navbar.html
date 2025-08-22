@@ -34,6 +34,14 @@
         <div class="text-truncate" data-i18n="Email the admin">Email the admin</div>
       </a>
     </li>
+    {% if user.is_superuser %}
+    <li class="menu-item">
+      <a href="/experts" class="menu-link">
+        <i class="menu-icon tf-icons bx bx-glasses"></i>
+        <div class="text-truncate" data-i18n="Modify experts">Modify experts</div>
+      </a>
+    </li>
+    {% endif %}
   </ul>
 
 </aside>
