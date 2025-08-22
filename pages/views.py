@@ -963,7 +963,6 @@ def update_survey_2(request):
   
   return Http404()
 
-
 def experts(request):
   if not request.user.is_authenticated or not request.user.is_superuser:
     context = {}
@@ -1019,3 +1018,50 @@ def delete_expert(request, expert_name):
     return JsonResponse({"success": True})
 
   return Http404()
+
+def chat_selection(request):
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
+
+  all_interviews = Interview.objects.all().order_by("-created")
+
+  context = {"curr_user": request.user, 
+             "all_interviews": all_interviews}
+  template = "pages/chat/chat_selection.html"
+  return render(request, template, context)
+
+
+def chat(request, participant_username, script_v):
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
+
+  # Loading the current user and preparing the context to return.
+  curr_user = Participant.objects.get(username=participant_username)
+  try: 
+    curr_interview = Interview.objects.get(participant=curr_user,
+                                            script_v=script_v)
+  except: 
+    curr_interview = None
+
+  if not curr_interview:
+    context = {}
+    template = "pages/home/content.html"
+    return render(request, template, context)
+
+  qs = (InterviewQuestion.objects.filter(interview=curr_interview)
+                                 .order_by('global_question_id'))
+  transcript = ""
+  for q in qs: 
+    transcript += q.convo + "\n"
+  transcript = cleanup_interview(transcript)
+
+  context = {"curr_user": curr_user,
+             "curr_interview": curr_interview, 
+             "transcript": transcript,
+             "script_v": script_v}
+  template = "pages/chat/chat.html"
+  return render(request, template, context)

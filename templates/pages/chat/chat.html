@@ -27,7 +27,7 @@
   <div class="content-wrapper">
 
     <div class="container-xxl flex-grow-1 container-p-y">
-      <h4 class="py-3 mb-4"><a href="{% url 'summary' %}">Summary</a> / <strong>Interview Transcription</strong></h4>
+      <h4 class="py-3 mb-4"><a href="{% url 'chat_selection' %}">Select Chat</a> / <strong>Chatting with {{curr_interview.participant.first_name}} {{curr_interview.participant.last_name}}</strong></h4>
 
       <div class="card g-3 mt-5" style="margin-top:0em !important">
         <div class="card-body row g-3">
@@ -40,15 +40,6 @@
                 <div class="cardMaster border p-3 rounded mb-3 {% if curr_module == 'Consent' %}active_module{% endif %}">
                   <div class="d-flex justify-content-between flex-sm-row flex-column">
                     <div class="card-information">
-                      <i class="menu-icon tf-icons bx bx-file"></i>
-                        
-                        <br><br>
-                      <p>
-                        {{curr_interview.p_notes}}
-                      </p>
-
-                      <hr>
-                      <br>
                       <h4>Transcription</h4>
                       <p>
                         {{transcript|linebreaksbr}}
