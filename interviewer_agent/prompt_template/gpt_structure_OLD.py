@@ -1,12 +1,13 @@
 import json
 import random
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key=get_open_api_keyset()["key"])
 import time 
 import threading
 
 from interviewer_agent.interviewer_utils.settings import * 
 
-openai.api_key = get_open_api_keyset()["key"]
 
 
 def jsp_log(message): 
@@ -102,7 +103,7 @@ def chat_safe_generate(prompt,
 
       if curr_gpt_response == "GENERATION ERROR": 
         time.sleep(2**i)
-      
+
       if func_validate(curr_gpt_response, prompt=prompt): 
         return func_clean_up(curr_gpt_response, prompt=prompt)
 
@@ -232,7 +233,7 @@ def threaded_chat_safe_generate(prompt,
 
       if curr_gpt_response == "THREAD HANGING": 
         break
-      
+
       if func_validate(curr_gpt_response, prompt=prompt): 
         return func_clean_up(curr_gpt_response, prompt=prompt)
 
@@ -274,8 +275,7 @@ def get_embedding(text, model="text-embedding-ada-002"):
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
-  return openai.Embedding.create(
-    input=[text], model=model)['data'][0]['embedding']
+  return client.embeddings.create(input=[text], model=model)['data'][0]['embedding']
 
 
 
