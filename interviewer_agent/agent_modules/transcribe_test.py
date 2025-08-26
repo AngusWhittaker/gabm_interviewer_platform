@@ -21,7 +21,6 @@ STORAGE_DIR = "storage"
 GOOGLE_CRED_PATH = os.environ.get("GOOGLE_CRED_PATH", "")
 
 INTERVIEW_AGENT_PATH = "interviewer_agent"
-openai.api_key = OPENAI_API_KEY
 
 
 def jsp_log(message): 
@@ -184,7 +183,7 @@ if __name__ == '__main__':
   # Transcribe the audio file
   transcription = threaded_transcribe_voice(audio_buffer, 
                     ["my name is Joon"], 10, 3)
-  
+
   end_time = time.time()
   elapsed_time = end_time - start_time
 

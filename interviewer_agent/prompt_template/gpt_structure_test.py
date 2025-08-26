@@ -1,6 +1,8 @@
 import json
 import random
-import openai
+from openai import OpenAI
+
+client = OpenAI(api_key=OPENAI_API_KEY)
 import time 
 import threading
 import queue
@@ -19,7 +21,6 @@ STORAGE_DIR = "storage"
 GOOGLE_CRED_PATH = os.environ.get("GOOGLE_CRED_PATH", "")
 
 INTERVIEW_AGENT_PATH = "interviewer_agent"
-openai.api_key = OPENAI_API_KEY
 
 
 def jsp_log(message): 
@@ -235,7 +236,7 @@ def threaded_chat_safe_generate(prompt,
       if curr_gpt_response == "THREAD HANGING": 
         print ("THREAD HANGING")
         break
-        
+
       print ("???")
       print ("???", func_validate(curr_gpt_response, prompt=prompt))
       if func_validate(curr_gpt_response, prompt=prompt): 
@@ -279,8 +280,7 @@ def get_embedding(text, model="text-embedding-ada-002"):
   text = text.replace("\n", " ")
   if not text: 
     text = "this is blank"
-  return openai.Embedding.create(
-    input=[text], model=model)['data'][0]['embedding']
+  return client.embeddings.create(input=[text], model=model)['data'][0]['embedding']
 
 
 

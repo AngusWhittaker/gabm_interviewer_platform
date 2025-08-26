@@ -9,7 +9,6 @@ from google.cloud import speech
 from global_methods import *
 from interviewer_agent.interviewer_utils.settings import * 
 
-openai.api_key = get_open_api_keyset()["key"]
 
 
 def jsp_log(message): 

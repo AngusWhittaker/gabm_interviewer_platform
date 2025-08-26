@@ -9,7 +9,6 @@ from google.cloud import speech
 from global_methods import *
 from interviewer_agent.interviewer_utils.settings import * 
 
-openai.api_key = get_open_api_keyset()["key"]
 
 
 def jsp_log(message): 
@@ -167,7 +166,7 @@ def threaded_transcribe_voice(audio_buffer,
 
   for count in range(max_retries):
     jsp_log(f"Current thread try: {count}")
-    
+
     q = queue.Queue()
     stop_event = threading.Event()
     transcribe_thread = threading.Thread(target=worker, args=(stop_event,))
