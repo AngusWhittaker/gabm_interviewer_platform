@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load crispy_forms_tags %}
+{% load reflection_filters %}
 
 {% block custom_head_content %}
   <style>
@@ -32,6 +33,9 @@
       <div class="card mt-5" style="margin-top:0em !important">
         
         <h4 class="p-3">Chat with the simulated interviewees</h4>
+        {% for item in all_reflections|filter_by_participant_id:49 %}
+          {{ item.name }}
+        {% endfor %}
         <div class="card-body row">
 
           <div class="col-lg-12">
@@ -56,6 +60,7 @@
                                     <th>Duration</th>
                                     <th>Chat</th>
                                     <th>Reflections</th>
+                                    <th></th>
                                     <th></th>
                                   </tr>
                                 </thead>
@@ -96,7 +101,14 @@
                                         Out of date
                                       </td>
                                       <td>
-                                        <a href="{% url 'chat' i.participant.username i.script_v %}" class="badge bg-label-primary">Update</a>
+                                        {% if i.previous_progress == i.question_id_count and all_reflections|get_reflection_count_by_participant_id:i.participant.id == num_experts %}
+                                          <span class="badge text-muted">Done</span>
+                                        {% else %}
+                                          <a href="{% url 'create_reflections' i.participant.username i.script_v %}" class="badge bg-label-primary">Update</a>
+                                        {% endif %}
+                                      </td>
+                                      <td>
+                                        <a href="{% url 'download_reflections' i.participant.username i.script_v %}" class="badge bg-label-primary">Export</a>
                                       </td>
 
                                     </tr>

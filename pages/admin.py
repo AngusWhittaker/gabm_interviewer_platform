@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from sim_brain.models import Expert
+from sim_brain.models import Expert, Reflection
 from .models import *
 
 
@@ -32,7 +32,8 @@ class InterviewAdmin(admin.ModelAdmin):
                   'question_id_count', 
                   'p_notes', 
                   'optional_key_phrases',
-                  'completed')
+                  'completed',
+                  'previous_progress')
   list_filter = ()
 admin.site.register(Interview, InterviewAdmin)
 
@@ -93,3 +94,8 @@ class ExpertReflectionAgentsAdmin(admin.ModelAdmin):
   list_display = ('name', 'prompt')
   list_filter = ()
 admin.site.register(Expert, ExpertReflectionAgentsAdmin)
+
+class ReflectionsAdmin(admin.ModelAdmin):
+  list_display = ('participant', 'reflectionType', 'content')
+  list_filter = ()
+admin.site.register(Reflection, ReflectionsAdmin)

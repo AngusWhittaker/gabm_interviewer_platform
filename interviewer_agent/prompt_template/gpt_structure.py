@@ -1,8 +1,11 @@
 import json
 import random
 from openai import OpenAI
+from interviewer_agent.interviewer_utils.settings import get_open_api_keyset
 
-client = OpenAI(api_key=get_open_api_keyset()["key"])
+
+api_key=get_open_api_keyset()["key"]
+client = OpenAI(api_key=api_key)
 import time 
 import threading
 import queue

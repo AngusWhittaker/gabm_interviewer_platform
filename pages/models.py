@@ -434,6 +434,9 @@ class Interview(models.Model):
   zipped_main = models.BooleanField(blank=False, null=False, default=False)
   zipped_audio = models.BooleanField(blank=False, null=False, default=False)
 
+  # Interview progress at time of creating the reflections
+  previous_progress = models.IntegerField(default=0)
+
   class Meta:
         # Define the unique constraint
         unique_together = [['participant', 'script_v']]
@@ -1047,7 +1050,6 @@ class Participant(AbstractUser):
 
   # Time of creation.
   created = models.DateTimeField(auto_now_add=True)
-
 
   def __str__(self):
     return str(self.last_name)

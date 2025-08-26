@@ -17,6 +17,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 from django.templatetags.static import static
 from django.core.files.storage import default_storage
+from django.db.models import Count
 
 from global_methods import *
 from datetime import datetime, timedelta
@@ -27,7 +28,8 @@ from allauth.account.signals import user_logged_in, user_signed_up
 from interviewer_agent.interviewer_utils.settings import *
 from interviewer_agent.agent_modules.vocalize import *
 from interviewer_agent.agent_modules.transcribe import *
-from sim_brain.models import Expert
+from sim_brain.create_reflection import create_reflection
+from sim_brain.models import Expert, Reflection
 
 from .forms import *
 from .models import *
@@ -979,7 +981,7 @@ def create_expert(request):
     name = request.POST.get('name', '')
     prompt = request.POST.get('prompt', '')
     if Expert.objects.filter(name=name).exists():
-        return JsonResponse({"success": False, "message": "Expert \"" + name + "\" already exists. Do you want to update instead?"})
+        return JsonResponse({"success": False, "message": "Expert \"" + name + "\" already exists. Do you want to update instead? Doing so will delete any reflections related to the original expert."})
     
     expert = Expert()
     expert.name = name
@@ -1001,9 +1003,16 @@ def update_expert(request, original_name):
     
     prompt = request.POST.get('prompt', '')
     expert = Expert.objects.get(name=original_name)
+
+    reflections = Reflection.objects.filter(reflectionType=expert)
+
+    for reflection in reflections:
+        reflection.delete()
+
     expert.name = name
     expert.prompt = prompt
     expert.save()
+
     return redirect("/experts")
 
   return Http404()
@@ -1014,6 +1023,12 @@ def delete_expert(request, expert_name):
       return HttpResponse("Expert not found.", status=404)
 
     expert = Expert.objects.get(name=expert_name)
+
+    reflections = Reflection.objects.filter(reflectionType=expert)
+    
+    for reflection in reflections:
+        reflection.delete()
+
     expert.delete()
     return JsonResponse({"success": True})
 
@@ -1026,9 +1041,13 @@ def chat_selection(request):
     return render(request, template, context)
 
   all_interviews = Interview.objects.all().order_by("-created")
+  all_reflections = Reflection.objects.all().order_by("-created")
+  num_experts = Expert.objects.count()
 
   context = {"curr_user": request.user, 
-             "all_interviews": all_interviews}
+             "all_interviews": all_interviews,
+             "all_reflections": all_reflections,
+             "num_experts": num_experts}
   template = "pages/chat/chat_selection.html"
   return render(request, template, context)
 
@@ -1065,3 +1084,89 @@ def chat(request, participant_username, script_v):
              "script_v": script_v}
   template = "pages/chat/chat.html"
   return render(request, template, context)
+
+def create_reflections(request, participant_username, script_v):
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
+  
+  curr_user = Participant.objects.get(username=participant_username)
+  curr_reflections = Reflection.objects.all().filter(participant=curr_user).order_by("created")
+  experts = Expert.objects.all().order_by("name")
+
+  try: 
+    curr_interview = Interview.objects.get(participant=curr_user,
+                                            script_v=script_v)
+  except:
+    curr_interview = None
+
+  if curr_interview is None:
+    return JsonResponse({"success": False, "message": "No interview found."})
+
+  qs = (InterviewQuestion.objects.filter(interview=curr_interview)
+                                 .order_by('global_question_id'))
+  transcript = ""
+  for q in qs: 
+    transcript += q.convo + "\n"
+
+  for expert in experts:
+    if expert not in [reflection.reflectionType for reflection in curr_reflections]:
+      new_reflection = Reflection()
+      new_reflection.participant = curr_user
+      new_reflection.reflectionType = expert
+      content = create_reflection(transcript, expert.prompt)
+      logging.info(f"{content}.")
+      new_reflection.content = content
+      new_reflection.save()
+      
+
+  curr_interview.previous_progress = curr_interview.question_id_count
+  curr_interview.save()
+
+  return chat_selection(request)
+
+def download_reflections(request, participant_username, script_v): 
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
+
+  # Loading the current user and preparing the context to return.
+  curr_user = Participant.objects.get(username=participant_username)
+  try: 
+    curr_reflections = Reflection.objects.all().filter(participant=curr_user).order_by("created")
+  except: 
+    curr_reflections = None
+
+  meta = {"user_name": participant_username, 
+          "email": curr_user.email, 
+          "script_v": script_v, 
+          "first_name": curr_user.first_name,
+          "last_name": curr_user.last_name,
+          "completed_modules": curr_user.completed_modules,
+          "camerer_activated": curr_user.camerer_activated, 
+          "created": curr_user.created,
+          "audio_calibration_float": curr_user.audio_calibration_float}
+  meta['created'] = meta['created'].isoformat()
+
+  # Create a byte stream to hold the ZIP file
+  in_memory_zip = io.BytesIO()
+
+  # Create a ZIP file
+  with zipfile.ZipFile(in_memory_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
+    for reflection in curr_reflections:
+      zf.writestr(f'reflection_{reflection.name}_{reflection.created}.txt', reflection.content)
+    # Convert the Python dictionary to a JSON string
+    json_str = json.dumps(meta, indent=4)  # Use `indent` for pretty printing
+    # Write the JSON string to a text file in the ZIP
+    zf.writestr('meta.json', json_str)
+
+  # Prepare the response, setting Content-Type and Content-Disposition
+  # headers to trigger a file download
+  response = HttpResponse(in_memory_zip.getvalue(), content_type='application/zip')
+  response['Content-Disposition'] = f'attachment; filename="{participant_username}-reflections.zip"'
+  # Make sure to seek to the start of the stream
+  in_memory_zip.seek(0)
+
+  return response
