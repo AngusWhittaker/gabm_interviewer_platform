@@ -1156,7 +1156,7 @@ def download_reflections(request, participant_username, script_v):
   # Create a ZIP file
   with zipfile.ZipFile(in_memory_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
     for reflection in curr_reflections:
-      zf.writestr(f'reflection_{reflection.name}_{reflection.created}.txt', reflection.content)
+      zf.writestr(f'reflection_{reflection.reflectionType.name}.txt', reflection.content)
     # Convert the Python dictionary to a JSON string
     json_str = json.dumps(meta, indent=4)  # Use `indent` for pretty printing
     # Write the JSON string to a text file in the ZIP
