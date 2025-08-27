@@ -16,6 +16,20 @@
       border-width:3px !important;
       border-color: #F72C25 !important;
     }
+
+    .ai_chat {
+      background-color: #e7e7ff;
+      border-radius: 5%;
+      margin-bottom: 5px;
+      padding: 10px;
+    }
+
+    .user_chat {
+      background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;
+      border-radius: 5%;
+      margin-bottom: 5px;
+      padding: 10px;
+    }
   </style>
 
   <link rel="stylesheet" href="{% static 'gabm/sneat/assets/vendor/libs/select2/select2.css' %}" />
@@ -27,7 +41,7 @@
   <div class="content-wrapper">
 
     <div class="container-xxl flex-grow-1 container-p-y">
-      <h4 class="py-3 mb-4"><a href="{% url 'chat_selection' %}">Select Chat</a> / <strong>Chatting with {{curr_interview.participant.first_name}} {{curr_interview.participant.last_name}}</strong></h4>
+      <h4 class="py-3 mb-4"><a href="{% url 'chat_selection' %}">Select Chat</a> / <strong>Chatting with {{curr_user.first_name}} {{curr_user.last_name}}</strong></h4>
 
       <div class="card g-3 mt-5" style="margin-top:0em !important">
         <div class="card-body row g-3">
@@ -37,15 +51,41 @@
             <div class="card-body">
               <div class="added-cards">
 
-                <div class="cardMaster border p-3 rounded mb-3 {% if curr_module == 'Consent' %}active_module{% endif %}">
-                  <div class="d-flex justify-content-between flex-sm-row flex-column">
-                    <div class="card-information">
-                      <h4>Transcription</h4>
-                      <p>
-                        {{transcript|linebreaksbr}}
-                      </p>
-                      
+                <div class="cardMaster border p-3 rounded mb-3">
+                  <div class="card-information">
+                    <div style="height: 60vh; overflow-y: auto;">
+                      {% for message in messages %}
+                        {% if message.role == 'user' %}
+                          <div class="d-flex flex-row-reverse" style="width: 100%;">
+                            <p class="user_chat">
+                              {{ message.content }}
+                            </p>
+                          </div>
+                        {% else %}
+                          <div class="d-flex" style="width: 100%;">
+                            <p class="ai_chat">
+                              {{ message.content }}
+                            </p>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
                     </div>
+
+                    <div>
+                      <form action="/send_chat/" method="post" id="chat-form">
+                        {% csrf_token %}
+                        <div class="d-flex flex-column">
+                          <textarea class="input my-2 auto-expand p-2 " style="width:100%" id="new-chat" name="new-chat" placeholder="Ask anything" required></textarea>
+                          <div class="d-flex justify-content-between">
+                            <button class="btn btn-label-secondary" type="button" onclick="document.getElementById('chat-form').reset();">Clear</button>
+                            <button class="btn btn-label-secondary mx-2" type="button" onclick="sendChat(document.getElementById('new-chat').value)">
+                                Send
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    </div>
+                    
                   </div>
                 </div>
 
@@ -58,13 +98,13 @@
 
           <div class="col-lg-4">
             <div class="card-header align-items-center">
-              <h5 class="card-action-title mb-0">Study Instructions</h5>
+              <h5 class="card-action-title mb-0">Chat Settings</h5>
             </div>
             <div class="card-body">
-              <small class="text-muted text-uppercase">About</small>
-              <p>testset</p>
-              <small class="text-muted text-uppercase">About</small>
-              <p>testset</p>
+              <small class="text-muted text-uppercase">Model</small>
+              <p>GPT-4o</p>
+              <small class="text-muted text-uppercase">With Reflection</small>
+              <p>None</p>
             </div>
           </div>
 
@@ -91,6 +131,23 @@
   <script src="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
 
   <script src="{% static 'gabm/sneat/assets/js/modal-create-app.js' %}"></script>
+
+  <script>
+    function sendChat(message) {
+      var context = JSON.parse('{{ messages_json|escapejs }}');
+      fetch(`/send-chat/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": "{{ csrf_token }}",
+          "Content-Type": "application/json",
+        },
+        body: {
+          message: message,
+          messages: context
+        }
+      })
+    }
+  </script>
   
 {% endblock js_content %}
 

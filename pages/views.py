@@ -1078,10 +1078,21 @@ def chat(request, participant_username, script_v):
     transcript += q.convo + "\n"
   transcript = cleanup_interview(transcript)
 
-  context = {"curr_user": curr_user,
-             "curr_interview": curr_interview, 
-             "transcript": transcript,
-             "script_v": script_v}
+  # context = {"curr_user": curr_user,
+  #            "curr_interview": curr_interview, 
+  #            "transcript": transcript,
+  #            "script_v": script_v}
+
+  messages = [
+      {"role": "user", "content": "Hi there how is your day?"},
+      {"role": "assistant", "content": "My day was great thank you"}
+    ]
+
+  context = {
+    "curr_user": curr_user,
+    "messages": messages,
+    "messages_json": json.dumps(messages)
+  }
   template = "pages/chat/chat.html"
   return render(request, template, context)
 
