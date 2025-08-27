@@ -28,6 +28,7 @@ pages_urlpatterns = [
   re_path(r'^experts$', pages_views.experts, name='experts'),
   re_path(r'^chat_selection$', pages_views.chat_selection, name='chat_selection'),
   re_path(r'^chat/(?P<participant_username>[^/]+)/(?P<script_v>[^/]+)/$', pages_views.chat, name='chat'),
+  re_path(r'^send-chat/(?P<participant_username>[^/]+)/(?P<script_v>[^/]+)/$', pages_views.send_chat, name='send_chat'),
   re_path(r'^interview/(?P<script_v>[^/]+)/$', pages_views.interview, name='interview'),
   re_path(r'^summary$', pages_views.summary, name='summary'),
   re_path(r'^summary_unprocessed_v1$', pages_views.summary_unprocessed_v1, name='summary_unprocessed_v1'),

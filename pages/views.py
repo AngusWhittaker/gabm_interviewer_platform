@@ -28,6 +28,7 @@ from allauth.account.signals import user_logged_in, user_signed_up
 from interviewer_agent.interviewer_utils.settings import *
 from interviewer_agent.agent_modules.vocalize import *
 from interviewer_agent.agent_modules.transcribe import *
+from sim_brain.ai_chat import ai_response
 from sim_brain.create_reflection import create_reflection
 from sim_brain.models import Expert, Reflection
 
@@ -1052,7 +1053,7 @@ def chat_selection(request):
   return render(request, template, context)
 
 
-def chat(request, participant_username, script_v):
+def chat(request, participant_username, script_v, messages=[], selected_experts=[]):
   if not request.user.is_authenticated or not request.user.is_superuser:
     context = {}
     template = "pages/home/landing.html"
@@ -1067,8 +1068,17 @@ def chat(request, participant_username, script_v):
     curr_interview = None
 
   if not curr_interview:
-    context = {}
-    template = "pages/home/content.html"
+    messages = [
+        {"role": "user", "content": "No interview found."}
+      ]
+
+    context = {
+      "curr_user": curr_user,
+      "messages": messages,
+      "messages_json": json.dumps(messages),
+      "script_v": script_v,
+      "experts": []
+    }
     return render(request, template, context)
 
   qs = (InterviewQuestion.objects.filter(interview=curr_interview)
@@ -1078,23 +1088,85 @@ def chat(request, participant_username, script_v):
     transcript += q.convo + "\n"
   transcript = cleanup_interview(transcript)
 
-  # context = {"curr_user": curr_user,
-  #            "curr_interview": curr_interview, 
-  #            "transcript": transcript,
-  #            "script_v": script_v}
-
-  messages = [
-      {"role": "user", "content": "Hi there how is your day?"},
-      {"role": "assistant", "content": "My day was great thank you"}
-    ]
+  expert_reflections = Reflection.objects.filter(participant__username=participant_username).order_by("created")
 
   context = {
     "curr_user": curr_user,
     "messages": messages,
-    "messages_json": json.dumps(messages)
+    "messages_json": json.dumps(messages),
+    "script_v": script_v,
+    "experts": [reflection.reflectionType.name for reflection in expert_reflections],
+    "selected_experts": selected_experts
   }
   template = "pages/chat/chat.html"
   return render(request, template, context)
+
+def send_chat(request, participant_username, script_v):
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
+  
+  if not request.method == 'POST':
+    return HttpResponse("Method not allowed", status=405)
+  
+  curr_user = Participant.objects.get(username=participant_username)
+  try: 
+    curr_interview = Interview.objects.get(participant=curr_user,
+                                            script_v=script_v)
+  except: 
+    curr_interview = None
+
+  if not curr_interview:
+    messages = [
+        {"role": "user", "content": "No interview found."}
+      ]
+
+    context = {
+      "curr_user": curr_user,
+      "messages": messages,
+      "messages_json": json.dumps(messages),
+      "script_v": script_v,
+      "experts": []
+    }
+    return render(request, template, context)
+
+  try:
+      data = json.loads(request.body.decode("utf-8"))
+  except json.JSONDecodeError:
+      return HttpResponse({"error": "Invalid JSON"}, status=400)
+  
+  messages = data.get('context', '[]')
+  message = data.get('message', '')
+  experts = data.get('experts', [])
+
+  qs = (InterviewQuestion.objects.filter(interview=curr_interview)
+                                 .order_by('global_question_id'))
+  transcript = ""
+  for q in qs: 
+    transcript += q.convo + "\n"
+  transcript = cleanup_interview(transcript)
+
+  if "all" in experts:
+    expert_reflections = Reflection.objects.filter(
+      participant__username=participant_username
+    ).order_by("created")
+  elif not experts or experts == [] or experts == ["none"]:
+    expert_reflections = None
+  else:
+    expert_reflections = Reflection.objects.filter(
+      participant__username=participant_username
+    ).filter(
+      reflectionType__name__in=experts
+    ).order_by("created")
+  
+  messages.append({"role": "user", "content": message})
+
+  result = ai_response(transcript, messages, message, expert_reflections)
+  
+  messages.append({"role": "assistant", "content": result})
+
+  return chat(request, participant_username, script_v, messages, experts)
 
 def create_reflections(request, participant_username, script_v):
   if not request.user.is_authenticated or not request.user.is_superuser:

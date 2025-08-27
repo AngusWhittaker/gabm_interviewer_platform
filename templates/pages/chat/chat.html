@@ -19,16 +19,18 @@
 
     .ai_chat {
       background-color: #e7e7ff;
-      border-radius: 5%;
+      border-radius: 5px;
       margin-bottom: 5px;
       padding: 10px;
+      max-width: 70%;
     }
 
     .user_chat {
       background-color: rgba(var(--bs-light-rgb), var(--bs-bg-opacity)) !important;
-      border-radius: 5%;
+      border-radius: 5px;
       margin-bottom: 5px;
       padding: 10px;
+      max-width: 70%;
     }
   </style>
 
@@ -53,18 +55,18 @@
 
                 <div class="cardMaster border p-3 rounded mb-3">
                   <div class="card-information">
-                    <div style="height: 60vh; overflow-y: auto;">
+                    <div style="height: 60vh; overflow-y: auto;" id="chat-box">
                       {% for message in messages %}
                         {% if message.role == 'user' %}
                           <div class="d-flex flex-row-reverse" style="width: 100%;">
                             <p class="user_chat">
-                              {{ message.content }}
+                              {{ message.content|linebreaksbr }}
                             </p>
                           </div>
                         {% else %}
                           <div class="d-flex" style="width: 100%;">
                             <p class="ai_chat">
-                              {{ message.content }}
+                              {{ message.content|linebreaksbr }}
                             </p>
                           </div>
                         {% endif %}
@@ -75,8 +77,8 @@
                       <form action="/send_chat/" method="post" id="chat-form">
                         {% csrf_token %}
                         <div class="d-flex flex-column">
-                          <textarea class="input my-2 auto-expand p-2 " style="width:100%" id="new-chat" name="new-chat" placeholder="Ask anything" required></textarea>
-                          <div class="d-flex justify-content-between">
+                          <textarea class="input my-2 auto-expand p-2 " style="width:100%" id="new-chat" name="new-chat" placeholder="Ask anything" required autocomplete="off"></textarea>
+                          <div class="d-flex justify-content-between mt-2">
                             <button class="btn btn-label-secondary" type="button" onclick="document.getElementById('chat-form').reset();">Clear</button>
                             <button class="btn btn-label-secondary mx-2" type="button" onclick="sendChat(document.getElementById('new-chat').value)">
                                 Send
@@ -100,11 +102,32 @@
             <div class="card-header align-items-center">
               <h5 class="card-action-title mb-0">Chat Settings</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body d-flex flex-column">
               <small class="text-muted text-uppercase">Model</small>
               <p>GPT-4o</p>
               <small class="text-muted text-uppercase">With Reflection</small>
-              <p>None</p>
+              <select id="experts" name="experts" multiple class="form-select">
+                {% if "all" in selected_experts %}
+                  <option value="all" selected>All</option>
+                {% else %}
+                  <option value="all">All</option>
+                {% endif %}
+                {% if "none" in selected_experts %}
+                  <option value="none" selected>None</option>
+                {% else %}
+                  <option value="none">None</option>
+                {% endif %}
+                {% for expert in experts %}
+                  {% if expert in selected_experts %}
+                    <option value="{{ expert }}" selected>{{ expert }}</option>
+                  {% else %}
+                    <option value="{{ expert }}">{{ expert }}</option>
+                  {% endif %}
+                {% endfor %}
+              </select>
+              <div class="d-flex flex-row-reverse">
+                <small class="text-muted">ctrl + click to select multiple</small>
+              </div>
             </div>
           </div>
 
@@ -135,18 +158,37 @@
   <script>
     function sendChat(message) {
       var context = JSON.parse('{{ messages_json|escapejs }}');
-      fetch(`/send-chat/`, {
+      var user = '{{ curr_user.username|escapejs }}';
+      var script_v = '{{ script_v|escapejs }}';
+      var expert_select = document.getElementById('experts');
+      var experts = Array.from(expert_select.selectedOptions).map(option => option.value);
+      console.log("experts:", experts);
+      fetch(`/send-chat/${user}/${script_v}/`, {
         method: "POST",
         headers: {
           "X-CSRFToken": "{{ csrf_token }}",
           "Content-Type": "application/json",
         },
-        body: {
+        body: JSON.stringify({
           message: message,
-          messages: context
-        }
+          context: context,
+          experts: experts
+        })
       })
+      .then(response => response.text())   // response is HTML string
+      .then(html => {
+        document.open();
+        document.write(html);
+        document.close();
+      });
     }
+  </script>
+
+  <script>
+      window.addEventListener("DOMContentLoaded", () => {
+    const box = document.getElementById("chat-box");
+    box.scrollTop = box.scrollHeight;
+  });
   </script>
   
 {% endblock js_content %}
