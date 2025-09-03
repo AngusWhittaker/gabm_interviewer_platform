@@ -28,8 +28,7 @@ from allauth.account.signals import user_logged_in, user_signed_up
 from interviewer_agent.interviewer_utils.settings import *
 from interviewer_agent.agent_modules.vocalize import *
 from interviewer_agent.agent_modules.transcribe import *
-from sim_brain.ai_chat import ai_response
-from sim_brain.create_reflection import create_reflection
+from sim_brain.brain_factory import BrainFactory
 from sim_brain.models import Expert, Reflection
 
 from .forms import *
@@ -1053,7 +1052,7 @@ def chat_selection(request):
   return render(request, template, context)
 
 
-def chat(request, participant_username, script_v, messages=[], selected_experts=[]):
+def chat(request, participant_username, script_v, messages=[], selected_experts=[], brain="park"):
   if not request.user.is_authenticated or not request.user.is_superuser:
     context = {}
     template = "pages/home/landing.html"
@@ -1096,7 +1095,8 @@ def chat(request, participant_username, script_v, messages=[], selected_experts=
     "messages_json": json.dumps(messages),
     "script_v": script_v,
     "experts": [reflection.reflectionType.name for reflection in expert_reflections],
-    "selected_experts": selected_experts
+    "selected_experts": selected_experts,
+    "brain": brain
   }
   template = "pages/chat/chat.html"
   return render(request, template, context)
@@ -1139,6 +1139,7 @@ def send_chat(request, participant_username, script_v):
   messages = data.get('context', '[]')
   message = data.get('message', '')
   experts = data.get('experts', [])
+  selectedBrain = data.get('brain', 'park')
 
   qs = (InterviewQuestion.objects.filter(interview=curr_interview)
                                  .order_by('global_question_id'))
@@ -1161,12 +1162,13 @@ def send_chat(request, participant_username, script_v):
     ).order_by("created")
   
   messages.append({"role": "user", "content": message})
+  brain = BrainFactory(selectedBrain)
 
-  result = ai_response(transcript, messages, message, expert_reflections)
+  result = brain.chat(transcript, messages, message, expert_reflections)
   
   messages.append({"role": "assistant", "content": result})
 
-  return chat(request, participant_username, script_v, messages, experts)
+  return chat(request, participant_username, script_v, messages, experts, selectedBrain)
 
 def create_reflections(request, participant_username, script_v):
   if not request.user.is_authenticated or not request.user.is_superuser:
@@ -1192,13 +1194,15 @@ def create_reflections(request, participant_username, script_v):
   transcript = ""
   for q in qs: 
     transcript += q.convo + "\n"
+  
+  brain = BrainFactory("park")
 
   for expert in experts:
     if expert not in [reflection.reflectionType for reflection in curr_reflections]:
       new_reflection = Reflection()
       new_reflection.participant = curr_user
       new_reflection.reflectionType = expert
-      content = create_reflection(transcript, expert.prompt)
+      content = brain.create_reflection(transcript, expert.prompt)
       logging.info(f"{content}.")
       new_reflection.content = content
       new_reflection.save()

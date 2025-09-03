@@ -103,8 +103,12 @@
               <h5 class="card-action-title mb-0">Chat Settings</h5>
             </div>
             <div class="card-body d-flex flex-column">
-              <small class="text-muted text-uppercase">Model</small>
-              <p>GPT-4o</p>
+              <small class="text-muted text-uppercase">Brain Selected</small>
+              <select id="brain" name="brain" class="form-select">
+                <option value="park" {% if brain == "park" %}selected{% endif %}>Park</option>
+                <option value="doppleganger" {% if brain == "doppleganger" %}selected{% endif %}>Doppleganger</option>
+              </select>
+              <br>
               <small class="text-muted text-uppercase">With Reflection</small>
               <select id="experts" name="experts" multiple class="form-select">
                 {% if "all" in selected_experts %}
@@ -162,6 +166,7 @@
       var script_v = '{{ script_v|escapejs }}';
       var expert_select = document.getElementById('experts');
       var experts = Array.from(expert_select.selectedOptions).map(option => option.value);
+      var brain = document.getElementById('brain').value;
       console.log("experts:", experts);
       fetch(`/send-chat/${user}/${script_v}/`, {
         method: "POST",
@@ -172,7 +177,8 @@
         body: JSON.stringify({
           message: message,
           context: context,
-          experts: experts
+          experts: experts,
+          brain: brain
         })
       })
       .then(response => response.text())   // response is HTML string
