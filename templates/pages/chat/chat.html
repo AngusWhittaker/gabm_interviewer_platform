@@ -79,7 +79,7 @@
                         <div class="d-flex flex-column">
                           <textarea class="input my-2 auto-expand p-2 " style="width:100%" id="new-chat" name="new-chat" placeholder="Ask anything" required autocomplete="off"></textarea>
                           <div class="d-flex justify-content-between mt-2">
-                            <button class="btn btn-label-secondary" type="button" onclick="document.getElementById('chat-form').reset();">Clear</button>
+                            <button class="btn btn-label-secondary" type="button" onclick="location.reload();">Clear Chat</button>
                             <button class="btn btn-label-secondary mx-2" type="button" onclick="sendChat(document.getElementById('new-chat').value)">
                                 Send
                             </button>
@@ -90,8 +90,6 @@
                     
                   </div>
                 </div>
-
-
 
               </div>
             </div>
@@ -142,12 +140,6 @@
   </div>
 {% endblock content %}
 
-
-{% block modal_block %}
-{% endblock modal_block %}
-
-
-
 {% block js_content %}
   <script src="{% static 'gabm/sneat/assets/vendor/libs/cleavejs/cleave.js' %}"></script>
   <script src="{% static 'gabm/sneat/assets/vendor/libs/cleavejs/cleave-phone.js' %}"></script>
@@ -191,7 +183,7 @@
   </script>
 
   <script>
-      window.addEventListener("DOMContentLoaded", () => {
+    window.addEventListener("DOMContentLoaded", () => {
     const box = document.getElementById("chat-box");
     box.scrollTop = box.scrollHeight;
   });

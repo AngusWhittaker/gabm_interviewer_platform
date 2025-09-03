@@ -1052,7 +1052,7 @@ def chat_selection(request):
   return render(request, template, context)
 
 
-def chat(request, participant_username, script_v, messages=[], selected_experts=[], brain="park"):
+def chat(request, participant_username, script_v, messages=[], selected_experts=["none"], brain="park"):
   if not request.user.is_authenticated or not request.user.is_superuser:
     context = {}
     template = "pages/home/landing.html"
@@ -1138,7 +1138,7 @@ def send_chat(request, participant_username, script_v):
   
   messages = data.get('context', '[]')
   message = data.get('message', '')
-  experts = data.get('experts', [])
+  experts = data.get('experts', ["none"])
   selectedBrain = data.get('brain', 'park')
 
   qs = (InterviewQuestion.objects.filter(interview=curr_interview)
@@ -1162,7 +1162,8 @@ def send_chat(request, participant_username, script_v):
     ).order_by("created")
   
   messages.append({"role": "user", "content": message})
-  brain = BrainFactory(selectedBrain)
+  
+  brain = BrainFactory.create_brain(selectedBrain)
 
   result = brain.chat(transcript, messages, message, expert_reflections)
   
