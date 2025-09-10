@@ -1258,3 +1258,21 @@ def download_reflections(request, participant_username, script_v):
   in_memory_zip.seek(0)
 
   return response
+
+
+def bulk_response(request):
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
+
+  all_interviews = Interview.objects.all().order_by("-created")
+  all_reflections = Reflection.objects.all().order_by("-created")
+  num_experts = Expert.objects.count()
+
+  context = {"curr_user": request.user, 
+             "all_interviews": all_interviews,
+             "all_reflections": all_reflections,
+             "num_experts": num_experts}
+  template = "pages/bulk_response/bulk_response.html"
+  return render(request, template, context)
