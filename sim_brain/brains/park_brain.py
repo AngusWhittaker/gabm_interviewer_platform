@@ -1,3 +1,4 @@
+import logging
 from sim_brain.brains.abstract_brain import AbstractBrain
 from openai import OpenAI
 import json
@@ -81,6 +82,7 @@ class ParkBrain(AbstractBrain):
 
         input_messages = [{"role": "user", "content": message}]
         
+        logging.info(f"Selecting expert")
         response = client.chat.completions.create(
             model=self.model,
             messages=input_messages,
@@ -147,7 +149,7 @@ class ParkBrain(AbstractBrain):
         ]
 
         messages.extend(entry for entry in context)
-
+        logging.info(f"Sending request to OpenAI for chat: {messages}")
         response = client.chat.completions.create(
             model=self.model,
             messages=messages

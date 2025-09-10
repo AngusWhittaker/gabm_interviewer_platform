@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from sim_brain.models import BulkQuestion, Expert, Reflection
+from sim_brain.models import BulkQuestion, Expert, Question, Reflection
 from .models import *
 
 
@@ -104,3 +104,8 @@ class BulkQuestionAdmin(admin.ModelAdmin):
   list_display = ('participant', 'brain', 'filename', 'reflectionType', 'filepath', 'totalQuestions', 'processedQuestions')
   list_filter = ()
 admin.site.register(BulkQuestion, BulkQuestionAdmin)
+
+class QuestionAdmin(admin.ModelAdmin):
+  list_display = ('bulkQuestion', 'question', 'response')
+  list_filter = ()
+admin.site.register(Question, QuestionAdmin)

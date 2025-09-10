@@ -33,6 +33,7 @@ pages_urlpatterns = [
   re_path(r'^summary$', pages_views.summary, name='summary'),
   re_path(r'^bulk-response$', pages_views.bulk_response, name='bulk_response'),
   re_path(r'^upload-bulk/$', pages_views.upload_bulk, name='upload_bulk'),
+  re_path(r'^download-bulk$', pages_views.download_bulk, name='download_bulk'),
   re_path(r'^summary_unprocessed_v1$', pages_views.summary_unprocessed_v1, name='summary_unprocessed_v1'),
   re_path(r'^create_reflections/(?P<participant_username>[^/]+)/(?P<script_v>[^/]+)/$', pages_views.create_reflections, name='create_reflections'),
   re_path(r'^download_p_data/(?P<participant_username>[^/]+)/(?P<script_v>[^/]+)/$', pages_views.download_p_data, name='download_p_data'),

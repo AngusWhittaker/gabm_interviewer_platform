@@ -20,3 +20,9 @@ class BulkQuestion(models.Model):
     totalQuestions = models.IntegerField(null=False, blank=False, default=0)
     processedQuestions = models.IntegerField(null=False, blank=False, default=0)
     created = models.DateTimeField(auto_now_add=True)
+
+class Question(models.Model):
+    bulkQuestion = models.ForeignKey('BulkQuestion', on_delete=models.CASCADE)
+    question = models.TextField(null=False, blank=False)
+    response = models.TextField(null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)

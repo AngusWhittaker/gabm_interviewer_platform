@@ -29,7 +29,7 @@ from interviewer_agent.interviewer_utils.settings import *
 from interviewer_agent.agent_modules.vocalize import *
 from interviewer_agent.agent_modules.transcribe import *
 from sim_brain.brain_factory import BrainFactory
-from sim_brain.models import BulkQuestion, Expert, Reflection
+from sim_brain.models import BulkQuestion, Expert, Question, Reflection
 
 from .forms import *
 from .models import *
@@ -1326,18 +1326,120 @@ def upload_bulk(request):
   bulk_questions.reflectionType = reflections
   bulk_questions.save()
 
-  # thread = threading.Thread(target=process_bulk_file, args=(filepath, file.name, user, brain, reflections))
-  # thread.start()
+  thread = threading.Thread(target=process_bulk_questions, args=(bulk_questions,))
+  thread.start()
   return bulk_response(request)
 
-# def process_bulk_file(file_path):
-#   try:
-#     with open(file_path, 'r', newline="", encoding="utf-8") as file:
-#       reader = csv.DictReader(file)
-#       for row in reader:
-#           Question.objects.create(
-#                     text=row.get("question"),
-#                     options=row.get("options", "")
-#                 )
+def process_bulk_questions(bulk_questions):
+  try:
+    logging.info(f"Thread entered, processing: {bulk_questions.filepath}")
+    with open(bulk_questions.filepath, 'r', newline="", encoding="utf-8") as file:
+      reader = csv.reader(file, delimiter=',')
+      rows = list(reader)
+      bulk_questions.totalQuestions = len(rows)
+      bulk_questions.save()
+      brain = BrainFactory.create_brain(bulk_questions.brain)
+      
+      curr_interview = Interview.objects.filter(participant=bulk_questions.participant).first()
 
-              
+      qs = (InterviewQuestion.objects.filter(interview=curr_interview)
+                                    .order_by('global_question_id'))
+      transcript = ""
+      for q in qs: 
+        transcript += q.convo + "\n"
+
+      if bulk_questions.reflectionType == "all":
+        expert_reflections = Reflection.objects.filter(
+          participant__username=bulk_questions.participant.username
+        ).order_by("created")
+      elif not bulk_questions.reflectionType or bulk_questions.reflectionType == ["none"]:
+        expert_reflections = None
+      else:
+        expert_reflections = Reflection.objects.filter(
+          participant__username=bulk_questions.participant.username
+        ).filter(
+          reflectionType__name=bulk_questions.reflectionType
+        ).order_by("created")
+
+      for row in rows:
+          question = row[0]
+          if not question or question == "":
+            bulk_questions.totalQuestions -= 1
+            bulk_questions.save()
+            continue
+          response = brain.chat(transcript, [], question, expert_reflections)
+          questionObj = Question()
+          questionObj.bulkQuestion = bulk_questions
+          questionObj.question = question
+          questionObj.response = response
+          questionObj.save()
+          bulk_questions.processedQuestions += 1
+          bulk_questions.save()
+          
+  except Exception as e:
+    # Log the error if needed
+    logging.error("Error processing CSV:", e)
+
+  finally:
+    os.remove(bulk_questions.filepath)
+
+def download_bulk(request):
+  
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
+
+  username = request.GET.get("username")
+  file = request.GET.get("file")
+  brain = request.GET.get("brain")
+  reflections = request.GET.get("reflections")
+  logging.info(f"Stuff is {username}, {file}, {brain}, {reflections}")
+  # Loading the current user and preparing the context to return.
+  bulk_question = BulkQuestion.objects.filter(participant__username=username, filename=file, brain=brain, reflectionType=reflections).order_by("created").first()
+  curr_user = Participant.objects.get(username=username)
+  try: 
+    questions = Question.objects.filter(bulkQuestion=bulk_question).order_by("created")
+  except: 
+    questions = None
+
+  meta = {"user_name": username, 
+          "email": curr_user.email, 
+          "first_name": curr_user.first_name,
+          "last_name": curr_user.last_name,
+          "completed_modules": curr_user.completed_modules,
+          "camerer_activated": curr_user.camerer_activated, 
+          "created": curr_user.created,
+          "audio_calibration_float": curr_user.audio_calibration_float}
+  meta['created'] = meta['created'].isoformat()
+
+  # Create a byte stream to hold the CSV file
+  csv_buffer = io.StringIO()
+  csv_writer = csv.writer(csv_buffer)
+  csv_writer.writerow(['Question', 'Response'])
+
+  for question in questions:
+    csv_writer.writerow([question.question, question.response])
+
+  csv_data = csv_buffer.getvalue().encode('utf-8')
+  csv_buffer.close()
+
+  # Create a byte stream to hold the ZIP file
+  in_memory_zip = io.BytesIO()
+
+  # Create a ZIP file
+  with zipfile.ZipFile(in_memory_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
+    # Convert the Python dictionary to a JSON string
+    json_str = json.dumps(meta, indent=4)  # Use `indent` for pretty printing
+    # Write the JSON string to a text file in the ZIP
+    zf.writestr('meta.json', json_str)
+    zf.writestr('questions.csv', csv_data)
+
+  # Prepare the response, setting Content-Type and Content-Disposition
+  # headers to trigger a file download
+  response = HttpResponse(in_memory_zip.getvalue(), content_type='application/zip')
+  response['Content-Disposition'] = f'attachment; filename="{os.path.splitext(bulk_question.filename)[0]}-responses.zip"'
+  # Make sure to seek to the start of the stream
+  in_memory_zip.seek(0)
+
+  return response

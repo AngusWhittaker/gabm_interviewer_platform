@@ -159,7 +159,7 @@
                                       <td>
                                         <div class="d-flex justify-content-center">
                                           {% if q.totalQuestions == q.processedQuestions %}
-                                            <a href="" class="badge bg-label-primary">Export</a>
+                                            <a href="/download-bulk?username={{ q.participant.username }}&file={{ q.filename|urlencode }}&brain={{ q.brain|urlencode }}&reflections={{ q.reflectionType|urlencode }}" class="badge bg-label-primary">Export</a>
                                           {% else %}
                                             <span class="badge bg-label-primary">Not ready</span>
                                           {% endif %}
