@@ -47,12 +47,12 @@
                   <div class="d-flex justify-content-between flex-column">
                     <div class="card-information">
 
-                      <form action="/upload-bulk/" method="post" id="create-form">
+                      <form action="/upload-bulk/" method="post" id="create-form" enctype="multipart/form-data">
                         {% csrf_token %}
                           <div class="d-flex flex-column">
 
                           <!-- Hidden file input -->
-                          <input type="file" id="fileInput" name="file" class="d-none">
+                          <input type="file" id="fileInput" name="fileInput" class="d-none" accept=".csv" required>
 
                           <label for="interviewee">Interviewee</label>
                           <select id="interviewee" name="interviewee" class="form-select mb-4">
@@ -76,11 +76,14 @@
                             {% endfor %}
                           </select>
                           
+                          <label for="fileName">Filename</label>
+                          <p class="mt-2" id="fileName" style="font-weight: 800 !important; font-style: italic;">Please upload a csv file...</p>
+                          
                           <div class="d-flex flex-row-reverse">
-                            <button class="btn btn-label-secondary mx-2" type="button" onclick="document.getElementById('create-form').reset();">
+                            <button id="sendBtn" class="btn btn-label-secondary mx-2" disabled>
                                 Send
                             </button>
-                            <button id="brain" name="brain" class="btn btn-label-secondary mx-2">
+                            <button id="uploadBtn" name="uploadBtn" type="button" class="btn btn-label-secondary mx-2">
                               Upload .csv
                             </button>
                           </div>
@@ -95,26 +98,7 @@
                 <div class="cardMaster border p-3 rounded mb-3">
                   <div class="d-flex justify-content-between flex-sm-row flex-column">
                     <div class="card-information">
-                      
-                                  <tr>
-                                    <td>
-                                    </td>
-                                    <td>
-                                    </td>
-                                    <td>
-                                    </td>
-                                    <td>
-                                      <span id="filename"></span>
-                                    </td>
-                                    <td>
-                                    </td>
-                                    <td>
-                                      <button id="brain" name="brain" class="badge bg-label-primary p-2" style="border: transparent;">
-                                        run
-                                      </button>
-                                    </td>
-                                  </tr>
-                      <p>Previously submitted bulk responses
+                      <p>Previously submitted bulk responses</p>
 
                         <div class="col-md-12">
                           <div class="card">
@@ -123,61 +107,63 @@
                                 <thead>
                                   <tr>
                                     <th>Interviewee</th>
-                                    <th>Reflection</th>
                                     <th>Brain</th>
+                                    <th>Reflection</th>
                                     <th>Filename</th>
-                                    <th>CSV</th>
-                                    <th>Reflections</th>
-                                    <th></th>
-                                    <th></th>
+                                    <th>Progress</th>
+                                    <th>Download</th>
                                   </tr>
                                 </thead>
                                 <tbody class="table-border-bottom-0">
 
-                                  {% for i in all_interviews %}
+                                  {% for q in bulk_questions %}
                                     <tr>
                                       <td>
                                         <div class="d-flex align-items-center">
                                           <img
-                                            src="{{i.participant.avatar.front_static.url}}"
+                                            src="{{q.participant.avatar.front_static.url}}"
                                             alt="Oneplus"
                                             height="32"
                                             width="32"
                                             class="me-2" />
                                           <div class="d-flex flex-column">
-                                            <span class="fw-medium lh-1" >{{i.participant.first_name}} {{i.participant.last_name}}</span>
-                                            <small class="text-muted" >{{i.participant.email}}</small>
+                                            <span class="fw-medium lh-1" >{{q.participant.first_name}} {{q.participant.last_name}}</span>
+                                            <small class="text-muted" >{{q.participant.email}}</small>
                                           </div>
                                         </div>
                                       </td>
                                       <td>
-                                        {{i.created}} 
+                                        <div class="d-flex justify-content-center">
+                                          <span class="badge bg-label-secondary me-1">{{q.brain}}</span>                  
+                                        </div>
                                       </td>
                                       <td>
-                                        {% if i.completed%}
-                                          Completed
-                                        {% else %}    
-                                          In progress
-                                        {% endif %}
+                                        <div class="d-flex justify-content-center">
+                                          <span class="badge bg-label-secondary me-1">{{q.reflectionType}}</span>
+                                        </div>
                                       </td>
                                       <td>
-                                        {{i.completed_sec}} 
+                                        <div class="d-flex justify-content-center">
+                                          <span class="badge bg-label-secondary me-1" style="text-transform: none;">{{q.filename}}</span>
+                                        </div>
                                       </td>
                                       <td>
-                                        <a href="{% url 'chat' i.participant.username i.script_v %}" class="badge bg-label-primary">Select</a>
+                                        <div class="d-flex justify-content-center">
+                                          {% if q.totalQuestions == q.processedQuestions %}
+                                            <span class="badge bg-label-success me-1">Completed</span>
+                                          {% else %}
+                                          <span class="badge bg-label-secondary me-1">{{q.processedQuestions}} / {{q.totalQuestions}}</span>
+                                          {% endif %}
+                                        </div>
                                       </td>
                                       <td>
-                                        Out of date
-                                      </td>
-                                      <td>
-                                        {% if i.previous_progress == i.question_id_count and all_reflections|get_reflection_count_by_participant_id:i.participant.id == num_experts %}
-                                          <span class="badge text-muted">Done</span>
-                                        {% else %}
-                                          <a href="{% url 'create_reflections' i.participant.username i.script_v %}" class="badge bg-label-primary">Update</a>
-                                        {% endif %}
-                                      </td>
-                                      <td>
-                                        <a href="{% url 'download_reflections' i.participant.username i.script_v %}" class="badge bg-label-primary">Export</a>
+                                        <div class="d-flex justify-content-center">
+                                          {% if q.totalQuestions == q.processedQuestions %}
+                                            <a href="" class="badge bg-label-primary">Export</a>
+                                          {% else %}
+                                            <span class="badge bg-label-primary">Not ready</span>
+                                          {% endif %}
+                                        </div>
                                       </td>
 
                                     </tr>
@@ -194,14 +180,9 @@
                   </div>
                 </div>
 
-
-
               </div>
             </div>
           </div>
-
-
-          
 
         </div>
       </div>
@@ -226,5 +207,31 @@
   <script src="{% static 'gabm/sneat/assets/vendor/libs/bs-stepper/bs-stepper.js' %}"></script>
 
   <script src="{% static 'gabm/sneat/assets/js/modal-create-app.js' %}"></script>
+
+  <script>
+    // GPT-4o generated the following for file upload handling
+    const fileInput = document.getElementById("fileInput");
+    const fileNameDisplay = document.getElementById("fileName");
+    const uploadBtn = document.getElementById("uploadBtn");
+    const sendBtn = document.getElementById("sendBtn");
+
+    // Open file dialog when button clicked
+    uploadBtn.addEventListener("click", () => 
+    {
+      alert("Please upload a csv file and ensure that it has at least a question column with 1 question per row.\n\nIn addition, you may provide an options column to specify answer options that the brain may select from.");
+      return fileInput.click();
+    });
+
+    // Show filename when user selects a file and enable send button
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        fileNameDisplay.textContent = "Selected: " + fileInput.files[0].name;
+        sendBtn.disabled = false;
+      } else {
+        fileNameDisplay.textContent = "";
+        sendBtn.disabled = true; 
+      }
+    });
+  </script>
   
 {% endblock js_content %}

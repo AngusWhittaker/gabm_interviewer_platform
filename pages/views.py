@@ -29,7 +29,7 @@ from interviewer_agent.interviewer_utils.settings import *
 from interviewer_agent.agent_modules.vocalize import *
 from interviewer_agent.agent_modules.transcribe import *
 from sim_brain.brain_factory import BrainFactory
-from sim_brain.models import Expert, Reflection
+from sim_brain.models import BulkQuestion, Expert, Reflection
 
 from .forms import *
 from .models import *
@@ -39,6 +39,9 @@ from .interview_settings import *
 from allauth.account.signals import user_signed_up
 from django.dispatch import receiver
 
+# For the csv file processing
+UPLOAD_DIR = os.path.join(settings.MEDIA_ROOT, "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def controlled_randomness(weight):
   """
@@ -1267,12 +1270,74 @@ def bulk_response(request):
     return render(request, template, context)
 
   all_interviews = Interview.objects.all().order_by("-created")
+  brains = BrainFactory.get_available_brains()
   all_reflections = Reflection.objects.all().order_by("-created")
-  num_experts = Expert.objects.count()
+  bulk_questions = BulkQuestion.objects.all().order_by("-created")
 
   context = {"curr_user": request.user, 
              "all_interviews": all_interviews,
              "all_reflections": all_reflections,
-             "num_experts": num_experts}
+             "brains": brains,
+             "bulk_questions": bulk_questions}
   template = "pages/bulk_response/bulk_response.html"
   return render(request, template, context)
+
+def upload_bulk(request):
+  if not request.user.is_authenticated or not request.user.is_superuser:
+    context = {}
+    template = "pages/home/landing.html"
+    return render(request, template, context)
+  
+  if request.method != 'POST':
+    return HttpResponse("Method not allowed", status=405)
+  
+  file = request.FILES.get('fileInput', None)
+  if not file or not file.name.endswith('.csv'):
+    return HttpResponse(f"Invalid file. Please upload a CSV file. It was {file.name}", status=400)
+
+  username = request.POST.get('interviewee', '')
+
+  if not username or username == "" or not Participant.objects.filter(username=username).exists():
+    return HttpResponse(f"Participant with username '{username}' does not exist.", status=400)
+  
+  user = Participant.objects.filter(username=username).first()
+
+  brainName = request.POST.get('brain', '')
+
+  if not brainName or brainName == "" or brainName not in BrainFactory.get_available_brains():
+    return HttpResponse(f"Brain '{brainName}' does not exist.", status=400)  
+
+  reflections = request.POST.get('reflections', '')
+  curr_reflections = Reflection.objects.all().filter(participant=user).order_by("created")
+
+  if not reflections in [reflection.reflectionType.name for reflection in curr_reflections] and reflections != "none" and reflections != "all":
+    return HttpResponse(f"Reflection '{reflections}' does not exist.", status=400)
+
+  filepath = os.path.join(UPLOAD_DIR, uuid.uuid4().hex + ".csv")
+  with open(filepath, 'wb+') as destination:
+    for chunk in file.chunks():
+      destination.write(chunk)
+
+  bulk_questions = BulkQuestion()
+  bulk_questions.filepath = filepath
+  bulk_questions.filename = file.name
+  bulk_questions.participant = user
+  bulk_questions.brain = brainName
+  bulk_questions.reflectionType = reflections
+  bulk_questions.save()
+
+  # thread = threading.Thread(target=process_bulk_file, args=(filepath, file.name, user, brain, reflections))
+  # thread.start()
+  return bulk_response(request)
+
+# def process_bulk_file(file_path):
+#   try:
+#     with open(file_path, 'r', newline="", encoding="utf-8") as file:
+#       reader = csv.DictReader(file)
+#       for row in reader:
+#           Question.objects.create(
+#                     text=row.get("question"),
+#                     options=row.get("options", "")
+#                 )
+
+              
