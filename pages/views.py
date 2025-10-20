@@ -1079,7 +1079,8 @@ def chat(request, participant_username, script_v, messages=[], selected_experts=
       "messages": messages,
       "messages_json": json.dumps(messages),
       "script_v": script_v,
-      "experts": []
+      "experts": [],
+      "brains": BrainFactory.get_available_brains()
     }
     return render(request, template, context)
 
@@ -1099,7 +1100,8 @@ def chat(request, participant_username, script_v, messages=[], selected_experts=
     "script_v": script_v,
     "experts": [reflection.reflectionType.name for reflection in expert_reflections],
     "selected_experts": selected_experts,
-    "brain": brain
+    "brain": brain,
+    "brains": BrainFactory.get_available_brains()
   }
   template = "pages/chat/chat.html"
   return render(request, template, context)
@@ -1130,7 +1132,8 @@ def send_chat(request, participant_username, script_v):
       "messages": messages,
       "messages_json": json.dumps(messages),
       "script_v": script_v,
-      "experts": []
+      "experts": [],
+      "brains": BrainFactory.get_available_brains()
     }
     return render(request, template, context)
 
@@ -1199,7 +1202,7 @@ def create_reflections(request, participant_username, script_v):
   for q in qs: 
     transcript += q.convo + "\n"
   
-  brain = BrainFactory("park")
+  brain = BrainFactory.create_brain("park")
 
   for expert in experts:
     if expert not in [reflection.reflectionType for reflection in curr_reflections]:
@@ -1274,11 +1277,13 @@ def bulk_response(request):
   all_reflections = Reflection.objects.all().order_by("-created")
   bulk_questions = BulkQuestion.objects.all().order_by("-created")
 
-  context = {"curr_user": request.user, 
-             "all_interviews": all_interviews,
-             "all_reflections": all_reflections,
-             "brains": brains,
-             "bulk_questions": bulk_questions}
+  context = {
+    "curr_user": request.user,
+    "all_interviews": all_interviews,
+    "all_reflections": all_reflections,
+    "brains": brains,
+    "bulk_questions": bulk_questions
+  }
   template = "pages/bulk_response/bulk_response.html"
   return render(request, template, context)
 
@@ -1367,7 +1372,7 @@ def process_bulk_questions(bulk_questions):
             bulk_questions.totalQuestions -= 1
             bulk_questions.save()
             continue
-          response = brain.chat(transcript, [], question, expert_reflections)
+          response = brain.chat(transcript, [{"role": "user", "content": question}], question, expert_reflections)
           questionObj = Question()
           questionObj.bulkQuestion = bulk_questions
           questionObj.question = question

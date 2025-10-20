@@ -63,8 +63,13 @@
 
                           <label for="brain">Brain</label>
                           <select id="brain" name="brain" class="form-select">
-                            <option value="park" selected>Park</option>
-                            <option value="doppleganger">Doppleganger</option>
+                            {% for brain_option in brains %}
+                              {% if brain_option == brain %}
+                                <option value="{{ brain_option }}" selected>{{ brain_option|capfirst }}</option>
+                              {% else %}
+                                <option value="{{ brain_option }}">{{ brain_option|capfirst }}</option>
+                              {% endif %}
+                            {% endfor %}
                           </select>
 `
                           <label for="reflections">Reflections</label>
@@ -218,7 +223,7 @@
     // Open file dialog when button clicked
     uploadBtn.addEventListener("click", () => 
     {
-      alert("Please upload a csv file and ensure that it has at least a question column with 1 question per row.\n\nIn addition, you may provide an options column to specify answer options that the brain may select from.");
+      alert("Please upload a csv file and ensure that contains a question column with 1 question per row.");
       return fileInput.click();
     });
 

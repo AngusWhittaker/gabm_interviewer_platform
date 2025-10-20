@@ -103,8 +103,13 @@
             <div class="card-body d-flex flex-column">
               <small class="text-muted text-uppercase">Brain Selected</small>
               <select id="brain" name="brain" class="form-select">
-                <option value="park" {% if brain == "park" %}selected{% endif %}>Park</option>
-                <option value="doppleganger" {% if brain == "doppleganger" %}selected{% endif %}>Doppleganger</option>
+                {% for brain_option in brains %}
+                  {% if brain_option == brain %}
+                    <option value="{{ brain_option }}" selected>{{ brain_option|capfirst }}</option>
+                  {% else %}
+                    <option value="{{ brain_option }}">{{ brain_option|capfirst }}</option>
+                  {% endif %}
+                {% endfor %}
               </select>
               <br>
               <small class="text-muted text-uppercase">With Reflection</small>
