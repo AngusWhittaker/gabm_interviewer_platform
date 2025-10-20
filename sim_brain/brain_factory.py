@@ -1,10 +1,11 @@
-from sim_brain.brains import ParkBrain, DopplegangerBrain
+from sim_brain.brains import ParkBrain, DopplegangerBrain, SillyBrain
 
 class BrainFactory():
     """Factory class to create brain instances."""
     brains = {
         "park": ParkBrain,
-        "doppleganger": DopplegangerBrain
+        "doppleganger": DopplegangerBrain,
+        # "test": SillyBrain  # Test brain for demo purposes
     }
 
     @classmethod
