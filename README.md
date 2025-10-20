@@ -1,6 +1,6 @@
 # Interviewer Platform
 
-The **Interviewer Platform** is a Django-based application designed to facilitate automated interviews with integrated transcription, vocalization, and comprehensive interview scripting functionalities. This repository houses the complete source code, configuration, and assets required to deploy and run the platform.
+The **Interviewer Platform** is a Django-based application designed for conducting automated interviews and simulating interviewee interactions. It integrates transcription, vocalization, and comprehensive interview scripting. Researchers can use this platform to facilitate interviews with participants and then interact with simulated interviewees that are  generated from the interview transcripts. This repository contains the complete source code, configuration, and assets necessary to deploy and run the platform.
 
 ---
 
@@ -19,12 +19,12 @@ The **Interviewer Platform** is a Django-based application designed to facilitat
 
 ## Overview
 
-The Interviewer Platform is built to manage and conduct interviews using a combination of automated scripts and real-time agent modules. It leverages Django’s robust framework to deliver a seamless user experience for both interview administrators and participants. Key functionalities include:
+The Interviewer Platform is built to manage and conduct interviews using a combination of automated scripts and real-time agent modules. Its functionality has been expanded upon to simulate interviewee responses based on their interview transcripts, allowing administrators to engage in interactive sessions with these simulations. It leverages Django’s robust framework to deliver a seamless user experience for both interview administrators and participants. Key functionalities include:
 
 - **Interview Scripting:** Define detailed interview modules using JSON scripts.
 - **Agent Modules:** Automated agents for transcription and vocalization.
-- **User Interface:** A comprehensive set of templates and views for managing interviews, user accounts, and settings.
-- **Infrastructure:** Ready-to-deploy configurations with Heroku support (Procfile, Aptfile, runtime.txt) and a structured settings module.
+- **User Interface:** A comprehensive set of templates and views for interacting with simulations, managing interviews, user accounts, and settings.
+- **Infrastructure:** Ready-to-deploy configurations, with Heroku support (Procfile, Aptfile, runtime.txt), Docker support (Dockerfile, compose.yml) and a structured settings module.
 
 ---
 
@@ -35,6 +35,8 @@ The Interviewer Platform is built to manage and conduct interviews using a combi
 - **Scalable Architecture:** Separation of concerns through modular directory structure (apps, templates, and utilities).
 - **User Management:** Full-featured account management with email confirmation, password reset, and social account integration.
 - **Deployment Ready:** Includes configuration files for easy deployment to platforms like Heroku.
+- **Containerised:** Services are containerised using (`Dockerfile`, `compose.yml`) for a smoother developer experience.
+- **Brain Factory:** A new simulation brain can be easily defined by inheriting from the `abstract_brain.py` and incorporated by listing it within the `brain_factory.py`.
 
 ---
 
@@ -45,18 +47,20 @@ Below is an overview of the repository’s directory structure:
 ```
 gabm_interviewer_platform/
 ├── Aptfile
-├── Procfile
+├── app.yaml
+├── compose.yml
 ├── db.sqlite3
+├── Dockerfile
+├── entrypoint.sh
 ├── global_methods.py
+├── google-cred.json
 ├── manage.py
 ├── requirements.txt
 ├── runtime.txt
 ├── gabm_infra/
 │   ├── __init__.py
-│   ├── asgi.py
 │   ├── db.sqlite3
 │   ├── urls.py
-│   ├── utils.py
 │   ├── wsgi.py
 │   └── settings/
 │       ├── __init__.py
@@ -148,6 +152,7 @@ gabm_interviewer_platform/
 │   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
+│   ├── context_processors.py
 │   ├── forms.py
 │   ├── interview_settings.py
 │   ├── models.py
@@ -156,21 +161,31 @@ gabm_interviewer_platform/
 │   ├── views.py
 │   └── migrations/
 │       ├── 0001_initial.py
-│       ├── 0002_alter_participant_email.py
-│       ├── 0003_interview_pruned_p_notes.py
-│       ├── 0004_alter_interview_p_notes_and_more.py
-│       ├── 0005_perfmeasurement.py
-│       ├── 0006_participant_completed_modules_det_timeouttimer.py
-│       ├── 0007_timeouttimer_cause.py
-│       ├── 0008_alter_timeouttimer_endtime.py
-│       ├── 0009_alter_interviewquestion_q_max_sec.py
-│       ├── 0010_interviewquestion_q_condition.py
-│       ├── 0011_behavioralstudymodule_and_more.py
-│       ├── 0012_remove_behavioralstudymodule_study_completed_1_and_more.py
-│       ├── 0013_participant_camerer_activated.py
-│       ├── 0014_interviewquestion_zipped_audio_and_more.py
-│       ├── 0015_remove_interviewquestion_zipped_audio_and_more.py
-│       └── __init__.py
+│   │   └── ... (2 more migration files)
+├── Procfile
+├── README.md
+├── sim_brain/
+│   ├── brain_factory.py
+│   ├── brains/
+│   │   ├── __init__.py
+│   │   ├── abstract_brain.py
+│   │   ├── doppleganger_brain.py
+│   │   ├── park_brain.py
+│   │   └── silly_brain.py
+│   ├── migrations/
+│   │   ├── 0001_initial.py
+│   │   └── ... (5 more migration files)
+│   ├── models.py
+│   └── templatetags/
+│       └── reflection_filters.py
+├── static_dirs/
+│   ├── gabm/
+│   │   ├── img/ ...
+│   │   ├── js/ ...
+│   │   └── sneat/ ...
+│   └── sneat/
+│       └── assets/ ...
+├── superuser.py
 └── templates/
     ├── aside_navbar.html
     ├── base.html
@@ -225,12 +240,18 @@ gabm_interviewer_platform/
     ├── pages/
     │   ├── archive/
     │   │   └── login.html
+    │   ├── bulk_response/
+    │   │   └── bulk_response.html
+    │   ├── chat/
+    │   │   ├── chat_selection.html
+    │   │   └── chat.html
     │   ├── create_avatar/
     │   │   └── create_avatar.html
+    │   ├── experts/
+    │   │   └── experts.html
     │   ├── home/
+    │   │   ├── admin.html
     │   │   ├── home.html
-    │   │   ├── home_OLD_2.html
-    │   │   ├── home_old.html
     │   │   └── landing.html
     │   ├── interview/
     │   │   ├── interivew_Jan7end_save.html
@@ -262,10 +283,11 @@ gabm_interviewer_platform/
 ```
 
 This structure separates concerns by grouping similar functionalities together:
-- **gabm_infra:** Core infrastructure and settings.
+- **gabm_infra:** Core infrastructure, project settings, and URL configurations.
 - **interviewer_agent:** Logic for interview scripting, agent modules (transcription, vocalization), and GPT prompt templates.
-- **pages:** Django app containing models, views, forms, pipelines, and migrations for the interview process.
-- **templates:** HTML templates for various parts of the application, including account management and interview pages.
+- **pages:** Django app containing models, views, forms, pipelines, and migrations for the interview process, simulation interaction and participant management.
+- **sim_brain:** Logic for the simulations, including different "brain" implementations, and their related database models.
+- **templates:** HTML templates for various parts of the application, including account management, interview interfaces, simulation interactive interfaces and administrative summaries.
 
 ---
 
@@ -283,8 +305,8 @@ This structure separates concerns by grouping similar functionalities together:
    It is recommended to use a virtual environment to manage dependencies.
 
    ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   python -m venv venv
+   source venv/Scripts/activate
    ```
 
 3. **Install Dependencies**
@@ -311,20 +333,20 @@ This structure separates concerns by grouping similar functionalities together:
 
 ## Usage
 
-1. **Create the db** 
-Wipe db.sqlite3 in src directory and run
+1. **Create the Database**
+   If you need to re-initialise the database, delete `db.sqlite3` in the project root and then run:
 
    ```bash
    python manage.py makemigrations
    python manage.py migrate
    ```
 
-2. **Creating an admin account**
+2. **Creating an Admin Account**
 
    ```bash
    python manage.py createsuperuser
    ```
-   Access the application page at [http://localhost:8000/admin](http://localhost:8000/admin)
+   Access the application admin page at [http://localhost:8000/admin](http://localhost:8000/admin)
 
 3. **Run the Development Server**
 
@@ -336,18 +358,22 @@ Wipe db.sqlite3 in src directory and run
 
 4. **Managing Interviews**
 
-   - Configure your interview settings via the Django admin or through the dedicated settings in the `pages` app.
+   - Configure interview settings via the Django admin interface or through dedicated settings within the `pages` app.
    - Update or customize interview scripts located in `interviewer_agent/interview_script/new_avp_full_v1/` as needed.
-   - Use the agent modules in `interviewer_agent/agent_modules/` for transcription and vocalization functionalities.
+   - Utilize the agent modules in `interviewer_agent/agent_modules/` for transcription and vocalization functionalities during interviews.
 
-5. **Loading the interview data**
+5. **Loading Interview Data**
 
-   - Using the admin account access [http://localhost:8000/summary](http://localhost:8000/summary) to see the participant list.
-   - From here you can load all of the interview data.
+   - As an administrator, access [http://localhost:8000/summary](http://localhost:8000/summary) to view the participant list.
+   - From this page, you can load interview data.
 
-6. **Working with Templates**
+6. **Interacting with Simulations**
 
-   Customize the look and feel of the platform by editing the HTML templates in the `templates/` directory.
+   - As an administrator, access [http://localhost:8000/chat](http://localhost:8000/chat) to select a simulation to chat with or access [http://localhost:8000/bulk-response](http://localhost:8000/bulk-response) to query the simulation with a bulk list of questions.
+
+7. **Working with Templates**
+
+   Customize the look and feel of the platform by editing the HTML templates located in the `templates/` directory.
 
 ---
 
@@ -358,12 +384,31 @@ Wipe db.sqlite3 in src directory and run
   - **Procfile**: For Heroku deployment.
   - **Aptfile**: To specify additional system-level dependencies.
   - **runtime.txt**: To define the Python runtime version.
+  - **app.yaml**: Configuration for Google App Engine deployment.- **compose.yml**: Docker Compose file for multi-container Docker applications.
+  - **Dockerfile**: Dockerfile for building the application image.
+  - **entrypoint.sh**: Entrypoint script for Docker containers.
 - **.env:** The necessary environment variables to run this project includes:
-  - **SECRET_KEY**: This is for the django server.
-  - **ALLOWED_HOSTS**: The list of valid hostnames.
-  - **OPENAI_API_KEY**: The OpenAI API key.
+  - **SECRET_KEY**: Django server secret key.
+  - **ALLOWED_HOSTS**: A comma-separated list of valid hostnames for the Django application.
+  - **OPENAI_API_KEY**: The OpenAI API key for GPT-based functionalities.
   - **OPENAI_API_KEY_OWNER**: The owner of the OpenAI API key.
-  - **GOOGLE_CRED_PATH**: The path to your Google Cloud service account key JSON file.
+  - **GOOGLE_CRED_PATH**: The path to your Google Cloud service account key JSON file for Google Cloud services (e.g., transcription/vocalization).
+  - **OPENAI_API_KEY_OWNER**: The owner of the OpenAI API key.
+  - **DATABASE_ENGINE**: The database engine for the database.
+  - **DATABASE_NAME**: The database name.
+  - **DATABASE_USERNAME**: The username to access the database.
+  - **DATABASE_PASSWORD**: The password to access the databse.
+  - **DATABASE_HOST**: The database host.
+  - **DATABASE_PORT**: The database port.
+  - **ADMIN_USERNAME**: The admin username used to access the admin dashboard.
+  - **ADMIN_EMAIL**: The admin email used to access the admin dashboard.
+  - **ADMIN_PASSWORD**: The admin password used to access the admin dashboard.
+  - **CONTACT_EMAIL**: The default email that participant's will have access to contact. This can be changed at runtime.
+  - **CONSENT_FORM_LINK**: The default link to the consent form that participant's will read. This can be changed at runtime.
+  - **SURVEY_1_LINK**: The default link to the first survey that participant's will have to complete. This can be changed at runtime.
+  - **SURVEY_1_SECRET**: The default password for the first survey that participants will provide to prove that they have completed the survey. This can be changed at runtime.
+  - **SURVEY_2_LINK**: The default link to the second survey that participant's will have to complete. This can be changed at runtime.
+  - **SURVEY_2_SECRET**: The default password for the second survey that participants will provide to prove that they have completed the survey. This can be changed at runtime.
 
 ---
 
