@@ -5,7 +5,7 @@ class BrainFactory():
     brains = {
         "park": ParkBrain,
         "doppleganger": DopplegangerBrain,
-        # "test": SillyBrain  # Test brain for demo purposes
+        "test": SillyBrain  # Test brain for demo purposes
     }
 
     @classmethod

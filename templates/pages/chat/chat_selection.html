@@ -98,7 +98,11 @@
                                         <a href="{% url 'chat' i.participant.username i.script_v %}" class="badge bg-label-primary">Select</a>
                                       </td>
                                       <td>
-                                        Out of date
+                                        {% if i.previous_progress == i.question_id_count and all_reflections|get_reflection_count_by_participant_id:i.participant.id == num_experts %}
+                                          Up to date
+                                        {% else %}
+                                          Out of date
+                                        {% endif %}
                                       </td>
                                       <td>
                                         {% if i.previous_progress == i.question_id_count and all_reflections|get_reflection_count_by_participant_id:i.participant.id == num_experts %}
