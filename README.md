@@ -9,7 +9,8 @@ The **Interviewer Platform** is a Django-based application designed for conducti
 - [Overview](#overview)
 - [Features](#features)
 - [Directory Structure](#directory-structure)
-- [Installation](#installation)
+- [Installation (With Docker)](#installation-with-docker)
+- [Installation (Without Docker)](#installation-without-docker)
 - [Usage](#usage)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
@@ -291,7 +292,27 @@ This structure separates concerns by grouping similar functionalities together:
 
 ---
 
-## Installation
+## Installation (With Docker)
+
+1. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/yourusername/gabm_interviewer_platform.git
+   cd gabm_interviewer_platform
+   ```
+
+2. **Define your environment variables for running with a PostgreSQL database**
+
+   Define your environment variables similar to below.
+
+   - DATABASE_ENGINE=postgresql_psycopg2
+   - DATABASE_NAME=dev
+   - DATABASE_USERNAME=dev
+   - DATABASE_PASSWORD=dev
+   - DATABASE_HOST=db
+   - DATABASE_PORT=5432
+
+## Installation (Without Docker)
 
 1. **Clone the Repository**
 
@@ -329,11 +350,7 @@ This structure separates concerns by grouping similar functionalities together:
    python manage.py collectstatic
    ```
 
----
-
-## Usage
-
-1. **Create the Database**
+6. **Create the Database**
    If you need to re-initialise the database, delete `db.sqlite3` in the project root and then run:
 
    ```bash
@@ -341,37 +358,39 @@ This structure separates concerns by grouping similar functionalities together:
    python manage.py migrate
    ```
 
-2. **Creating an Admin Account**
+---
 
-   ```bash
-   python manage.py createsuperuser
-   ```
-   Access the application admin page at [http://localhost:8000/admin](http://localhost:8000/admin)
+## Usage
 
-3. **Run the Development Server**
+1. **Run the Development Server**
 
    ```bash
    python manage.py runserver
    ```
 
+   OR the following if using Docker
+
+   ```bash
+   docker compose up -d
+   ```
    Access the application at [http://localhost:8000](http://localhost:8000).
 
-4. **Managing Interviews**
+2. **Managing Interviews**
 
    - Configure interview settings via the Django admin interface or through dedicated settings within the `pages` app.
    - Update or customize interview scripts located in `interviewer_agent/interview_script/new_avp_full_v1/` as needed.
    - Utilize the agent modules in `interviewer_agent/agent_modules/` for transcription and vocalization functionalities during interviews.
 
-5. **Loading Interview Data**
+3. **Loading Interview Data**
 
    - As an administrator, access [http://localhost:8000/summary](http://localhost:8000/summary) to view the participant list.
    - From this page, you can load interview data.
 
-6. **Interacting with Simulations**
+4. **Interacting with Simulations**
 
    - As an administrator, access [http://localhost:8000/chat](http://localhost:8000/chat) to select a simulation to chat with or access [http://localhost:8000/bulk-response](http://localhost:8000/bulk-response) to query the simulation with a bulk list of questions.
 
-7. **Working with Templates**
+5. **Working with Templates**
 
    Customize the look and feel of the platform by editing the HTML templates located in the `templates/` directory.
 
